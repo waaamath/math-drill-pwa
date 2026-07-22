@@ -4,8 +4,22 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 // ---- 狀態 ----
+let mode = "normal";                 // "normal" | "level"
 let settings = { ops: ["+", "-", "×"], minA: 1, maxA: 20, minB: 1, maxB: 20, count: 20 };
 let quiz = { questions: [], index: 0, correct: 0, input: "", wrong: [] };
+
+// 過關模式：7 關的正負組合（加減）
+const LEVELS = [
+  { name: "正 － 正", s1: 1,  op: "-", s2: 1 },
+  { name: "負 ＋ 正", s1: -1, op: "+", s2: 1 },
+  { name: "負 － 正", s1: -1, op: "-", s2: 1 },
+  { name: "正 － 負", s1: 1,  op: "-", s2: -1 },
+  { name: "負 － 負", s1: -1, op: "-", s2: -1 },
+  { name: "正 ＋ 負", s1: 1,  op: "+", s2: -1 },
+  { name: "負 ＋ 負", s1: -1, op: "+", s2: -1 },
+];
+const GOAL = 30;                     // 每關需連續答對的題數
+let lvl = { idx: 0, streak: 0, retry: false, q: null };
 
 // ---- 畫面切換 ----
 function show(id) {
@@ -57,10 +71,7 @@ function fmt(n) {
 
 // ---- 開始練習 ----
 function startQuiz() {
-  // 讀取運算
-  const ops = [...$$(".op-toggle input:checked")].map((c) => c.value);
-  if (ops.length === 0) return showSetupError("請至少選一種運算");
-
+  // 讀取數字範圍（兩種模式都要）
   const minA = parseInt($("#minA").value, 10);
   const maxA = parseInt($("#maxA").value, 10);
   const minB = parseInt($("#minB").value, 10);
@@ -68,6 +79,19 @@ function startQuiz() {
   if ([minA, maxA, minB, maxB].some((n) => Number.isNaN(n))) return showSetupError("範圍必須是數字");
   if (minA > maxA || minB > maxB) return showSetupError("最小值不能大於最大值");
 
+  if (mode === "level") {
+    settings = { minA, maxA, minB, maxB };
+    lvl = { idx: 0, streak: 0, retry: false, q: null };
+    showSetupError("");
+    show("quiz");
+    $("#level-banner").hidden = false;
+    renderLevelQuestion();
+    return;
+  }
+
+  // 一般模式
+  const ops = [...$$(".op-toggle input:checked")].map((c) => c.value);
+  if (ops.length === 0) return showSetupError("請至少選一種運算");
   const count = parseInt($(".count-btn.active").dataset.count, 10);
   settings = { ops, minA, maxA, minB, maxB, count };
 
@@ -76,7 +100,96 @@ function startQuiz() {
 
   showSetupError("");
   show("quiz");
+  $("#level-banner").hidden = true;
   renderQuestion();
+}
+
+// ===== 過關模式 =====
+// 由範圍取「大小」（絕對值），正負由關卡決定
+function magFrom(min, max) {
+  const hi = Math.max(Math.abs(min), Math.abs(max));
+  return randInt(1, Math.max(1, hi));
+}
+
+function makeLevelQuestion() {
+  const L = LEVELS[lvl.idx];
+  const a = L.s1 * magFrom(settings.minA, settings.maxA);
+  const b = L.s2 * magFrom(settings.minB, settings.maxB);
+  const answer = L.op === "+" ? a + b : a - b;
+  return { a, b, op: L.op, answer, text: `${fmt(a)} ${L.op} ${fmt(b)} =` };
+}
+
+function renderLevelQuestion() {
+  lvl.q = makeLevelQuestion();
+  lvl.retry = false;
+  quiz.input = "";
+  const L = LEVELS[lvl.idx];
+  $("#level-banner").innerHTML = `第 ${lvl.idx + 1} 關　${L.name}<span class="sub">共 ${LEVELS.length} 關</span>`;
+  $("#question").textContent = lvl.q.text;
+  updateAnswerBox();
+  $("#feedback").textContent = "";
+  $("#feedback").className = "feedback";
+  $("#answer").className = "answer-box";
+  updateLevelProgress();
+}
+
+function updateLevelProgress() {
+  $("#progress-bar").style.width = (lvl.streak / GOAL * 100) + "%";
+  $("#progress-text").textContent = `連續 ${lvl.streak} / ${GOAL}`;
+}
+
+function submitLevel() {
+  if (quiz.input === "" || quiz.input === "-") return;
+  const val = parseInt(quiz.input, 10);
+  const q = lvl.q;
+  const box = $("#answer");
+  const fb = $("#feedback");
+
+  if (val === q.answer) {
+    box.classList.add("ok"); fb.className = "feedback ok";
+    if (lvl.retry) {
+      // 重輸正確 → 換下一題（此題不計入連續）
+      fb.textContent = "正確，繼續！ ✓";
+      setTimeout(renderLevelQuestion, 500);
+    } else {
+      lvl.streak++;
+      updateLevelProgress();
+      if (lvl.streak >= GOAL) {
+        fb.textContent = "過關！ 🎉";
+        setTimeout(clearLevel, 800);
+      } else {
+        fb.textContent = "答對了！ ✓";
+        setTimeout(renderLevelQuestion, 450);
+      }
+    }
+  } else {
+    // 答錯 → 連續歸零、顯示正確答案、要求重新輸入
+    box.classList.add("bad"); fb.className = "feedback bad";
+    lvl.streak = 0;
+    lvl.retry = true;
+    updateLevelProgress();
+    fb.textContent = `答錯，正確答案是 ${q.answer}，請重新輸入`;
+    setTimeout(() => {
+      quiz.input = "";
+      updateAnswerBox();
+      box.className = "answer-box";
+    }, 1000);
+  }
+}
+
+function clearLevel() {
+  lvl.idx++;
+  lvl.streak = 0;
+  if (lvl.idx >= LEVELS.length) showLevelWin();
+  else renderLevelQuestion();
+}
+
+function showLevelWin() {
+  show("result");
+  $("#level-banner").hidden = true;
+  $("#score").textContent = "全破 🏆";
+  $("#score-detail").textContent = `恭喜通過全部 ${LEVELS.length} 關！`;
+  $("#wrong-list").innerHTML = "";
 }
 
 function showSetupError(msg) { $("#setup-error").textContent = msg; }
@@ -166,12 +279,33 @@ function showResult() {
   }
 }
 
+// ---- 送出：依模式分派 ----
+function onSubmit() { mode === "level" ? submitLevel() : submitAnswer(); }
+
+// ---- 模式切換 UI ----
+function updateModeUI() {
+  $$(".mode-btn").forEach((b) => b.classList.toggle("active", b.dataset.mode === mode));
+  const isLevel = mode === "level";
+  $("#ops-card").classList.toggle("hidden", isLevel);
+  $("#count-card").classList.toggle("hidden", isLevel);
+  $("#start-btn").textContent = isLevel ? "開始過關" : "開始練習";
+  $("#mode-hint").textContent = isLevel
+    ? "7 關正負加減，連續答對 30 題過關；答錯歸零並要重新輸入。數字大小取下方範圍的絕對值。"
+    : "";
+}
+
 // ===== 事件綁定 =====
 $("#start-btn").addEventListener("click", startQuiz);
 $("#quit-btn").addEventListener("click", () => show("setup"));
-$("#submit-btn").addEventListener("click", submitAnswer);
+$("#submit-btn").addEventListener("click", onSubmit);
 $("#again-btn").addEventListener("click", startQuiz);
 $("#home-btn").addEventListener("click", () => show("setup"));
+
+$$(".mode-btn").forEach((btn) => btn.addEventListener("click", () => {
+  mode = btn.dataset.mode;
+  updateModeUI();
+}));
+updateModeUI();
 
 $$(".count-btn").forEach((btn) => btn.addEventListener("click", () => {
   $$(".count-btn").forEach((b) => b.classList.remove("active"));
@@ -186,7 +320,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key >= "0" && e.key <= "9") pressKey(e.key);
   else if (e.key === "-") pressKey("sign");
   else if (e.key === "Backspace") pressKey("back");
-  else if (e.key === "Enter") submitAnswer();
+  else if (e.key === "Enter") onSubmit();
 });
 
 // ===== Service Worker 註冊 =====

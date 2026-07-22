@@ -1,5 +1,5 @@
 // Service Worker — 離線快取
-const CACHE = "math-drill-v1";
+const CACHE = "math-drill-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -23,10 +23,16 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// 快取優先，找不到再走網路
+// 網路優先：連得上網就拿最新版並更新快取；離線時才用快取。
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request))
+    fetch(e.request)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });

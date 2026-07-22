@@ -24,6 +24,14 @@
       <h1>整數四則運算練習</h1>
 
       <div class="card">
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-mode="normal">一般練習</button>
+          <button class="mode-btn" data-mode="level">過關模式</button>
+        </div>
+        <p id="mode-hint" class="mode-hint"></p>
+      </div>
+
+      <div class="card" id="ops-card">
         <h2>選擇運算</h2>
         <div class="ops">
           <label class="op-toggle"><input type="checkbox" value="+" checked><span>＋ 加</span></label>
@@ -49,7 +57,7 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" id="count-card">
         <h2>題數</h2>
         <div class="count-row">
           <button class="count-btn" data-count="10">10 題</button>
@@ -62,6 +70,8 @@
       <button id="start-btn" class="primary big">開始練習</button>
     </section>
 
+    <!-- 過關模式的關卡橫幅（一般模式隱藏） -->
+
     <!-- ===== 練習畫面 ===== -->
     <section id="quiz" class="screen">
       <header class="quiz-top">
@@ -69,6 +79,8 @@
         <div class="progress-wrap"><div id="progress-bar"></div></div>
         <span id="progress-text">1 / 20</span>
       </header>
+
+      <div id="level-banner" class="level-banner" hidden></div>
 
       <div class="question-area">
         <div id="question" class="question">2 ＋ 3 =</div>
