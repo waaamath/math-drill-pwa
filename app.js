@@ -38,7 +38,12 @@ function makeQuestion() {
       answer = quotient;
       break;
   }
-  return { a, b, op, answer, text: `${a} ${op} ${b} =` };
+  return { a, b, op, answer, text: `${fmt(a)} ${op} ${fmt(b)} =` };
+}
+
+// ---- 數字顯示：負數加括號 ----
+function fmt(n) {
+  return n < 0 ? `(${n})` : `${n}`;
 }
 
 // ---- 開始練習 ----
