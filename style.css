@@ -76,6 +76,21 @@ h2 { font-size: 18px; margin: 0 0 12px; color: var(--muted); font-weight: 600; }
 .rv-item.rv-current { color: var(--text); opacity: 1; border: 2px solid var(--accent2); }
 .rv-item.rv-done { color: var(--ok); opacity: 1; }
 
+/* 關卡選擇 */
+.levels-select { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lvl-toggle { position: relative; }
+.lvl-toggle input { position: absolute; opacity: 0; }
+.lvl-toggle span {
+  display: block; text-align: center; padding: 14px 8px; font-size: 15px; font-weight: 700;
+  background: var(--card2); border-radius: 10px; border: 2px solid transparent; transition: .15s;
+}
+.lvl-toggle input:checked + span { background: var(--accent); border-color: var(--accent2); }
+.levels-actions { display: flex; gap: 10px; margin-top: 12px; }
+.mini-btn {
+  flex: 1; padding: 10px; font-size: 14px; font-weight: 700;
+  background: var(--card2); color: var(--muted); border: none; border-radius: 10px;
+}
+
 .ops { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .op-toggle { position: relative; }
 .op-toggle input { position: absolute; opacity: 0; }

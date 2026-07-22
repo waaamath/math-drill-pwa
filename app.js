@@ -22,7 +22,8 @@ const GOAL = 30;                     // 每關需連續答對的題數
 const REVIEW_TRIGGER = 5;            // 累積錯幾題就進入錯題複習
 const TOTAL_LEVELS = LEVELS.length + 1;   // 7 關 + 第 8 關（混合）
 // phase: "normal"（一般答題）| "retry"（答錯後立即重輸）| "review"（錯題複習）
-let lvl = { idx: 0, streak: 0, phase: "normal", q: null, wrongPool: [], review: null };
+// plan：本次要練的關卡索引清單（升冪）；step：目前練到 plan 的第幾個
+let lvl = { plan: [], step: 0, idx: 0, streak: 0, phase: "normal", q: null, wrongPool: [], review: null };
 
 function levelName(idx) {
   return idx < LEVELS.length ? LEVELS[idx].name : "混合（前 7 關綜合）";
@@ -87,8 +88,11 @@ function startQuiz() {
   if (minA > maxA || minB > maxB) return showSetupError("最小值不能大於最大值");
 
   if (mode === "level") {
+    const plan = [...$$("#levels-select input:checked")]
+      .map((c) => parseInt(c.value, 10)).sort((a, b) => a - b);
+    if (plan.length === 0) return showSetupError("請至少勾選一關");
     settings = { minA, maxA, minB, maxB };
-    lvl = { idx: 0, streak: 0, phase: "normal", q: null, wrongPool: [], review: null };
+    lvl = { plan, step: 0, idx: plan[0], streak: 0, phase: "normal", q: null, wrongPool: [], review: null };
     showSetupError("");
     show("quiz");
     $("#level-banner").hidden = false;
@@ -138,7 +142,7 @@ function renderLevelQuestion() {
   quiz.input = "";
   $("#review-panel").hidden = true;
   $("#level-banner").innerHTML =
-    `第 ${lvl.idx + 1} 關　${levelName(lvl.idx)}<span class="sub">共 ${TOTAL_LEVELS} 關</span>`;
+    `第 ${lvl.idx + 1} 關　${levelName(lvl.idx)}<span class="sub">進度 ${lvl.step + 1} / ${lvl.plan.length} 關</span>`;
   $("#question").textContent = lvl.q.text;
   updateAnswerBox();
   $("#feedback").textContent = "";
@@ -262,18 +266,18 @@ function clearInputSoon(box) {
 }
 
 function clearLevel() {
-  lvl.idx++;
+  lvl.step++;
   lvl.streak = 0;
   lvl.wrongPool = [];
-  if (lvl.idx >= TOTAL_LEVELS) showLevelWin();
-  else renderLevelQuestion();
+  if (lvl.step >= lvl.plan.length) showLevelWin();
+  else { lvl.idx = lvl.plan[lvl.step]; renderLevelQuestion(); }
 }
 
 function showLevelWin() {
   show("result");
   $("#level-banner").hidden = true;
   $("#score").textContent = "全破 🏆";
-  $("#score-detail").textContent = `恭喜通過全部 ${TOTAL_LEVELS} 關！`;
+  $("#score-detail").textContent = `恭喜通過選擇的 ${lvl.plan.length} 關！`;
   $("#wrong-list").innerHTML = "";
 }
 
@@ -367,15 +371,28 @@ function showResult() {
 // ---- 送出：依模式分派 ----
 function onSubmit() { mode === "level" ? submitLevel() : submitAnswer(); }
 
+// ---- 建立關卡勾選清單 ----
+function buildLevelSelect() {
+  const box = $("#levels-select");
+  box.innerHTML = "";
+  for (let i = 0; i < TOTAL_LEVELS; i++) {
+    const label = document.createElement("label");
+    label.className = "lvl-toggle";
+    label.innerHTML = `<input type="checkbox" value="${i}" checked><span>第 ${i + 1} 關<br>${levelName(i)}</span>`;
+    box.appendChild(label);
+  }
+}
+
 // ---- 模式切換 UI ----
 function updateModeUI() {
   $$(".mode-btn").forEach((b) => b.classList.toggle("active", b.dataset.mode === mode));
   const isLevel = mode === "level";
+  $("#levels-card").classList.toggle("hidden", !isLevel);
   $("#ops-card").classList.toggle("hidden", isLevel);
   $("#count-card").classList.toggle("hidden", isLevel);
   $("#start-btn").textContent = isLevel ? "開始過關" : "開始練習";
   $("#mode-hint").textContent = isLevel
-    ? "共 8 關（第 8 關為前 7 關混合），連續答對 30 題過關；答錯歸零並要重新輸入，累積錯 5 題會把那 5 題列出來重新練習。數字大小取下方範圍的絕對值。"
+    ? "勾選要練的關卡（第 8 關為前 7 關混合）；依序從最前面那關開始，連續答對 30 題過關。答錯歸零並要重新輸入，累積錯 5 題會把那 5 題列出來重新練習。數字大小取下方範圍的絕對值。"
     : "";
 }
 
@@ -390,6 +407,13 @@ $$(".mode-btn").forEach((btn) => btn.addEventListener("click", () => {
   mode = btn.dataset.mode;
   updateModeUI();
 }));
+
+$("#lvl-all").addEventListener("click", () =>
+  $$("#levels-select input").forEach((c) => (c.checked = true)));
+$("#lvl-none").addEventListener("click", () =>
+  $$("#levels-select input").forEach((c) => (c.checked = false)));
+
+buildLevelSelect();
 updateModeUI();
 
 $$(".count-btn").forEach((btn) => btn.addEventListener("click", () => {
