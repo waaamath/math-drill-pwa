@@ -30,13 +30,22 @@ function makeQuestion() {
     case "+": answer = a + b; break;
     case "-": answer = a - b; break;
     case "×": answer = a * b; break;
-    case "÷":
-      // 除法：確保整除。用商×除數回推被除數，除數不為 0。
-      if (b === 0) b = 1;
-      const quotient = randInt(settings.minA, settings.maxA);
-      a = b * quotient;
-      answer = quotient;
+    case "÷": {
+      // 除法：第一個數字＝被除數、第二個數字＝除數（皆照各自範圍，含負數）。
+      // 把被除數 a 調成除數 b 的倍數以保證整除；除數不為 0。
+      if (b === 0) b = settings.maxB > 0 ? 1 : -1;
+      const lo = Math.min(settings.minA, settings.maxA);
+      const hi = Math.max(settings.minA, settings.maxA);
+      // 商 q 需讓 b*q 落在 [lo, hi]；除以負數會反向，故取兩端最小/最大。
+      const qMin = Math.ceil(Math.min(lo / b, hi / b));
+      const qMax = Math.floor(Math.max(lo / b, hi / b));
+      let q = Math.round(a / b);                    // 最接近原被除數的商
+      if (qMin <= qMax) q = Math.min(Math.max(q, qMin), qMax);
+      else if (q === 0) q = 1;                       // 範圍太窄的退路，至少給非零題
+      a = b * q;
+      answer = q;
       break;
+    }
   }
   return { a, b, op, answer, text: `${fmt(a)} ${op} ${fmt(b)} =` };
 }
