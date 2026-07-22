@@ -1,4 +1,5 @@
 // ===== 整數四則運算練習 PWA =====
+const VERSION = "v7";
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
@@ -415,6 +416,7 @@ $("#lvl-none").addEventListener("click", () =>
 
 buildLevelSelect();
 updateModeUI();
+$("#app-version").textContent = `整數四則運算練習　${VERSION}`;
 
 $$(".count-btn").forEach((btn) => btn.addEventListener("click", () => {
   $$(".count-btn").forEach((b) => b.classList.remove("active"));

@@ -30,6 +30,12 @@ html, body {
 /* 數字輸入框仍可選取 */
 input { user-select: text; -webkit-user-select: text; }
 
+/* 版本註記 */
+.app-version {
+  text-align: center; color: var(--muted); font-size: 12px;
+  padding: 8px 0 20px; opacity: .55;
+}
+
 #app {
   max-width: 640px;
   margin: 0 auto;
