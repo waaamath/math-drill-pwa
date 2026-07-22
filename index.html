@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#4f46e5" />
+  <title>整數四則運算練習</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="四則運算" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ===== 設定畫面 ===== -->
+    <section id="setup" class="screen active">
+      <h1>整數四則運算練習</h1>
+
+      <div class="card">
+        <h2>選擇運算</h2>
+        <div class="ops">
+          <label class="op-toggle"><input type="checkbox" value="+" checked><span>＋ 加</span></label>
+          <label class="op-toggle"><input type="checkbox" value="-" checked><span>－ 減</span></label>
+          <label class="op-toggle"><input type="checkbox" value="×" checked><span>× 乘</span></label>
+          <label class="op-toggle"><input type="checkbox" value="÷"><span>÷ 除</span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>第一個數字範圍</h2>
+        <div class="range-row">
+          <label>最小 <input type="number" id="minA" value="1"></label>
+          <label>最大 <input type="number" id="maxA" value="20"></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>第二個數字範圍</h2>
+        <div class="range-row">
+          <label>最小 <input type="number" id="minB" value="1"></label>
+          <label>最大 <input type="number" id="maxB" value="20"></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>題數</h2>
+        <div class="count-row">
+          <button class="count-btn" data-count="10">10 題</button>
+          <button class="count-btn active" data-count="20">20 題</button>
+          <button class="count-btn" data-count="30">30 題</button>
+        </div>
+      </div>
+
+      <p id="setup-error" class="error"></p>
+      <button id="start-btn" class="primary big">開始練習</button>
+    </section>
+
+    <!-- ===== 練習畫面 ===== -->
+    <section id="quiz" class="screen">
+      <header class="quiz-top">
+        <button id="quit-btn" class="ghost">✕</button>
+        <div class="progress-wrap"><div id="progress-bar"></div></div>
+        <span id="progress-text">1 / 20</span>
+      </header>
+
+      <div class="question-area">
+        <div id="question" class="question">2 ＋ 3 =</div>
+        <div id="answer" class="answer-box"><span class="placeholder">?</span></div>
+        <div id="feedback" class="feedback"></div>
+      </div>
+
+      <div class="keypad">
+        <button class="key" data-key="7">7</button>
+        <button class="key" data-key="8">8</button>
+        <button class="key" data-key="9">9</button>
+        <button class="key" data-key="4">4</button>
+        <button class="key" data-key="5">5</button>
+        <button class="key" data-key="6">6</button>
+        <button class="key" data-key="1">1</button>
+        <button class="key" data-key="2">2</button>
+        <button class="key" data-key="3">3</button>
+        <button class="key sign" data-key="sign">±</button>
+        <button class="key" data-key="0">0</button>
+        <button class="key back" data-key="back">⌫</button>
+      </div>
+
+      <button id="submit-btn" class="primary big">確定</button>
+    </section>
+
+    <!-- ===== 結果畫面 ===== -->
+    <section id="result" class="screen">
+      <h1>練習完成！</h1>
+      <div id="score" class="score">0 / 0</div>
+      <div id="score-detail" class="score-detail"></div>
+      <div id="wrong-list" class="wrong-list"></div>
+      <button id="again-btn" class="primary big">再一次</button>
+      <button id="home-btn" class="ghost big">回設定</button>
+    </section>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

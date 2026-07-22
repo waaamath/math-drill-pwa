@@ -1,0 +1,135 @@
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --card2: #334155;
+  --accent: #4f46e5;
+  --accent2: #6366f1;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --ok: #22c55e;
+  --bad: #ef4444;
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  overscroll-behavior: none;
+}
+
+#app {
+  max-width: 640px;
+  margin: 0 auto;
+  min-height: 100%;
+  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+}
+
+.screen { display: none; flex-direction: column; gap: 16px; padding: 20px 0 32px; }
+.screen.active { display: flex; }
+
+h1 { font-size: 28px; text-align: center; margin: 8px 0; }
+h2 { font-size: 18px; margin: 0 0 12px; color: var(--muted); font-weight: 600; }
+
+/* ===== 設定畫面 ===== */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.ops { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.op-toggle { position: relative; }
+.op-toggle input { position: absolute; opacity: 0; }
+.op-toggle span {
+  display: block; text-align: center; padding: 18px; font-size: 20px; font-weight: 700;
+  background: var(--card2); border-radius: 12px; border: 2px solid transparent;
+  transition: .15s;
+}
+.op-toggle input:checked + span {
+  background: var(--accent); border-color: var(--accent2);
+}
+
+.range-row, .count-row { display: flex; gap: 12px; }
+.range-row label {
+  flex: 1; display: flex; flex-direction: column; gap: 6px;
+  font-size: 14px; color: var(--muted);
+}
+.range-row input {
+  width: 100%; padding: 14px; font-size: 22px; text-align: center;
+  background: var(--card2); border: none; border-radius: 12px; color: var(--text);
+}
+
+.count-btn {
+  flex: 1; padding: 16px; font-size: 18px; font-weight: 700;
+  background: var(--card2); color: var(--text);
+  border: 2px solid transparent; border-radius: 12px;
+}
+.count-btn.active { background: var(--accent); border-color: var(--accent2); }
+
+.error { color: var(--bad); text-align: center; min-height: 20px; margin: 0; font-weight: 600; }
+
+/* ===== 按鈕 ===== */
+button { cursor: pointer; font-family: inherit; }
+.primary {
+  background: var(--accent); color: #fff; border: none; border-radius: 14px;
+  font-weight: 800;
+}
+.primary:active { background: var(--accent2); }
+.big { padding: 20px; font-size: 22px; width: 100%; }
+.ghost {
+  background: transparent; color: var(--muted); border: none; font-size: 18px;
+}
+.ghost.big { border: 2px solid var(--card2); border-radius: 14px; }
+
+/* ===== 練習畫面 ===== */
+#quiz { justify-content: space-between; min-height: 100vh; }
+
+.quiz-top { display: flex; align-items: center; gap: 12px; }
+#quit-btn { font-size: 24px; width: 44px; }
+.progress-wrap { flex: 1; height: 10px; background: var(--card2); border-radius: 6px; overflow: hidden; }
+#progress-bar { height: 100%; width: 0%; background: var(--accent); transition: width .3s; }
+#progress-text { color: var(--muted); font-size: 14px; min-width: 56px; text-align: right; }
+
+.question-area { text-align: center; padding: 20px 0; }
+.question { font-size: 44px; font-weight: 800; letter-spacing: 2px; }
+.answer-box {
+  margin: 20px auto 0; min-height: 72px; min-width: 200px; max-width: 320px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px; font-weight: 800;
+  background: var(--card); border-radius: var(--radius); border: 3px solid var(--card2);
+  padding: 0 20px;
+}
+.answer-box .placeholder { color: var(--muted); }
+.answer-box.ok { border-color: var(--ok); }
+.answer-box.bad { border-color: var(--bad); }
+.feedback { min-height: 28px; margin-top: 12px; font-size: 20px; font-weight: 700; }
+.feedback.ok { color: var(--ok); }
+.feedback.bad { color: var(--bad); }
+
+.keypad {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 8px 0;
+}
+.key {
+  padding: 22px; font-size: 28px; font-weight: 700;
+  background: var(--card); color: var(--text);
+  border: none; border-radius: 14px;
+}
+.key:active { background: var(--card2); }
+.key.sign { background: var(--card2); }
+.key.back { background: var(--card2); }
+
+/* ===== 結果畫面 ===== */
+.score { text-align: center; font-size: 56px; font-weight: 800; color: var(--accent2); }
+.score-detail { text-align: center; color: var(--muted); font-size: 18px; }
+.wrong-list { display: flex; flex-direction: column; gap: 8px; }
+.wrong-item {
+  background: var(--card); border-radius: 12px; padding: 12px 16px;
+  display: flex; justify-content: space-between; font-size: 18px;
+}
+.wrong-item .you { color: var(--bad); }
+.wrong-item .correct { color: var(--ok); font-weight: 700; }
