@@ -69,10 +69,10 @@ function makeQuestion() {
       break;
     }
   }
-  return { a, b, op, answer, text: `${fmt(a)} ${op} ${fmt(b)} =` };
+  return { a, b, op, answer, text: `${a} ${op} ${fmt(b)} =` };
 }
 
-// ---- 數字顯示：負數加括號 ----
+// ---- 數字顯示：第一個數字直接顯示，第二個數字若為負數加括號 ----
 function fmt(n) {
   return n < 0 ? `(${n})` : `${n}`;
 }
@@ -132,7 +132,7 @@ function makeLevelQuestion() {
   const a = L.s1 * magFrom(settings.minA, settings.maxA);
   const b = L.s2 * magFrom(settings.minB, settings.maxB);
   const answer = L.op === "+" ? a + b : a - b;
-  return { a, b, op: L.op, answer, text: `${fmt(a)} ${L.op} ${fmt(b)} =` };
+  return { a, b, op: L.op, answer, text: `${a} ${L.op} ${fmt(b)} =` };
 }
 
 // 一般答題：出下一題
