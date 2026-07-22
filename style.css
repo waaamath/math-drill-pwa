@@ -20,7 +20,15 @@ html, body {
   color: var(--text);
   font-family: -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
   overscroll-behavior: none;
+  touch-action: pan-y;               /* 允許上下捲動，禁止雙指縮放 */
+  -webkit-text-size-adjust: 100%;    /* 禁止自動放大字級 */
+  text-size-adjust: 100%;
+  -webkit-user-select: none;         /* 避免長按選字 */
+  user-select: none;
 }
+
+/* 數字輸入框仍可選取 */
+input { user-select: text; -webkit-user-select: text; }
 
 #app {
   max-width: 640px;

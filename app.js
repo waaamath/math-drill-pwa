@@ -432,6 +432,21 @@ document.addEventListener("keydown", (e) => {
   else if (e.key === "Enter") onSubmit();
 });
 
+// ===== 禁止縮放（iOS Safari 會忽略 viewport 的 user-scalable，需再攔截手勢） =====
+["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
+  document.addEventListener(ev, (e) => e.preventDefault()));
+// 雙指縮放
+document.addEventListener("touchmove", (e) => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+// 雙擊放大
+let lastTouch = 0;
+document.addEventListener("touchend", (e) => {
+  const now = Date.now();
+  if (now - lastTouch <= 300) e.preventDefault();
+  lastTouch = now;
+}, { passive: false });
+
 // ===== Service Worker 註冊 =====
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
