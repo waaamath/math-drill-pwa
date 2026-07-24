@@ -1,5 +1,5 @@
 // Service Worker — 離線快取
-const CACHE = "math-drill-v10";
+const CACHE = "math-drill-v11";
 const ASSETS = [
   "./",
   "./index.html",

@@ -1,4 +1,5 @@
-/* ===== 綺妍版：馬卡龍／奶油紫手帳風（只套用在過關頁）===== */
+/* ===== 綺妍版：奶油紫 × 白 × 馬卡龍（只套用在過關頁）=====
+   目標：像文具店的可愛學習 App，乾淨溫柔、有闖關遊戲感 */
 :root {
   --bg: #F8F6FF;
   --card: #FFFFFF;
@@ -9,7 +10,8 @@
   --muted: #8B84A8;     /* 次要字 */
   --ok: #3FBE7A;
   --bad: #F5738C;
-  --gold: #FFD76A;      /* 選取強調 */
+  --gold: #FFC83D;      /* 選取強調 */
+  --line: #E9E3FF;      /* 邊框 */
   --radius: 20px;
 }
 
@@ -27,29 +29,23 @@ h2 { color: var(--accent2); font-weight: 700; }
 .card {
   background: var(--card);
   border-radius: var(--radius);
-  box-shadow: 0 8px 24px rgba(139, 123, 255, .15);
+  box-shadow: 0 6px 20px rgba(139, 123, 255, .12);
 }
 
-/* 主按鈕：漸層、圓角 18、hover 變亮、按下微縮 */
+/* 主按鈕：漸層、圓角 18、hover 上浮、按下微縮 */
 .primary {
   background: linear-gradient(135deg, #9C8BFF, #7E6BFF);
   border-radius: 18px;
-  box-shadow: 0 6px 16px rgba(126, 107, 255, .35);
-  transition: transform .1s, filter .15s;
+  box-shadow: 0 8px 20px rgba(128, 98, 255, .25);
+  transition: transform .12s ease, filter .15s, box-shadow .15s;
 }
-.primary:hover { filter: brightness(1.08); }
-.primary:active {
-  background: linear-gradient(135deg, #9C8BFF, #7E6BFF);
-  transform: scale(.97);
-}
+.primary:hover { filter: brightness(1.06); transform: translateY(-2px); box-shadow: 0 12px 24px rgba(128, 98, 255, .3); }
+.primary:active { background: linear-gradient(135deg, #9C8BFF, #7E6BFF); transform: scale(.97); }
 
 /* 次要／幽靈按鈕 */
 .ghost { color: #B0A8CE; }
-.ghost.big { border: 2px solid #E4DCFF; border-radius: 16px; }
-.mini-btn {
-  background: #EFEBFF; color: var(--accent2); font-weight: 700; border-radius: 12px;
-  transition: transform .1s;
-}
+.ghost.big { border: 2px solid var(--line); border-radius: 16px; }
+.mini-btn { background: #EFEBFF; color: var(--accent2); font-weight: 700; border-radius: 12px; transition: transform .1s; }
 .mini-btn:active { transform: scale(.96); }
 
 /* 輸入框：淺紫底、Focus 紫框 */
@@ -59,20 +55,27 @@ h2 { color: var(--accent2); font-weight: 700; }
 }
 .range-row input:focus { outline: none; border-color: var(--accent); }
 
-/* 關卡選擇：黃色外框＋淡淡發光 */
+/* 關卡選擇：未選白底細框；選取黃框＋淡發光、加大 */
+.levels-select { gap: 12px; }
 .lvl-toggle span {
-  background: var(--card2); color: #6E639E; border: 2px solid transparent;
-  border-radius: 14px; font-weight: 700;
+  background: #FFFFFF; color: #6E639E; border: 1px solid var(--line);
+  border-radius: 16px; font-weight: 700; font-size: 17px; line-height: 1.55;
+  min-height: 74px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 12px 8px;
+  box-shadow: 0 3px 10px rgba(139, 123, 255, .08);
+  transition: transform .1s;
 }
 .lvl-toggle input:checked + span {
-  background: #FFF7DE; color: var(--text); border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(255, 215, 106, .4), 0 6px 14px rgba(255, 215, 106, .35);
+  background: #FFF9EA; color: var(--text); border: 2px solid var(--gold);
+  box-shadow: 0 0 0 3px rgba(255, 200, 61, .35), 0 6px 16px rgba(255, 200, 61, .3);
 }
+.lvl-toggle input:active + span { transform: scale(.97); }
 
-/* 進度條 */
-.progress-wrap { background: #EAE4FF; }
+/* 進度／狀態列：字大一點好讀 */
+.progress-wrap { background: #EAE4FF; height: 12px; }
 #progress-bar { background: linear-gradient(90deg, #9C8BFF, #7E6BFF); }
-#progress-text { color: var(--muted); }
+#progress-text { color: var(--muted); font-size: 14px; font-weight: 600; min-width: auto; white-space: nowrap; }
+#quit-btn { color: #B0A8CE; }
 
 /* 關卡橫幅 */
 .level-banner {
@@ -82,26 +85,34 @@ h2 { color: var(--accent2); font-weight: 700; }
 }
 .level-banner .sub { color: var(--muted); }
 
-/* 題目與答案框 */
-.question { color: var(--text); }
+/* 題目：加大成為主視覺 */
+.question { color: var(--text); font-size: clamp(42px, 12vw, 58px); }
+
+/* 答案框與提示 */
 .answer-box {
-  background: #FFFFFF; border: 3px solid #E4DCFF; color: var(--text);
+  background: #FFFFFF; border: 3px solid var(--line); color: var(--text);
   box-shadow: 0 6px 18px rgba(139, 123, 255, .15);
 }
+.answer-box .placeholder { font-size: 22px; color: #B9B0DA; font-weight: 500; }
 .answer-box.ok { border-color: var(--ok); animation: pop .4s ease; }
 .answer-box.bad { border-color: var(--bad); animation: shake .4s ease; }
-
 @keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
 @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
-/* 數字鍵盤 */
+/* 回饋文字 */
+.feedback { font-weight: 700; }
+.feedback.ok { color: var(--ok); }
+.feedback.bad { color: var(--bad); }
+
+/* 數字鍵盤：白底淡紫框，按下淡紫底 */
 .key {
-  background: #F3EFFF; color: var(--text); border-radius: 16px; font-weight: 700;
-  box-shadow: 0 3px 8px rgba(139, 123, 255, .15);
-  transition: transform .08s;
+  background: #FFFFFF; color: var(--text); border: 1.5px solid var(--line);
+  border-radius: 16px; font-weight: 700;
+  box-shadow: 0 3px 8px rgba(139, 123, 255, .10);
+  transition: transform .08s, background .1s;
 }
-.key:active { transform: scale(.95); background: #E7E0FF; }
-.key.sign, .key.back { background: #E7E0FF; }
+.key:active { transform: scale(.95); background: #EFEAFF; border-color: #D8CCFF; }
+.key.sign, .key.back { background: #F3EFFF; }
 
 /* 錯題複習面板 */
 .review-panel { background: #FFF3F6; border: 2px solid #F7A8BE; }
@@ -112,6 +123,7 @@ h2 { color: var(--accent2); font-weight: 700; }
 
 /* 結果頁 */
 .score { color: var(--accent2); }
+.score-detail { color: #666666; }
 .record-status.ok { color: var(--ok); }
 .record-status.bad { color: var(--bad); }
 .wrong-item { box-shadow: 0 3px 10px rgba(139, 123, 255, .1); }
@@ -124,6 +136,4 @@ h2 { color: var(--accent2); font-weight: 700; }
   z-index: 999; pointer-events: none;
   animation: confetti-fall 2.2s linear forwards;
 }
-@keyframes confetti-fall {
-  to { top: 105vh; transform: rotate(720deg); }
-}
+@keyframes confetti-fall { to { top: 105vh; transform: rotate(720deg); } }

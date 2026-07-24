@@ -1,5 +1,9 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v10";
+const VERSION = "v11";
+
+// 答對稱讚語（隨機）
+const PRAISES = ["✨ 答對！", "🌟 Good！", "💯 太棒了！", "😊 正確！"];
+function praise() { return PRAISES[Math.floor(Math.random() * PRAISES.length)]; }
 
 // ★ Apps Script Web App 網址，紀錄會回傳到 Google 試算表 ★
 const RECORD_URL = "https://script.google.com/macros/s/AKfycbwmV0YlYeg6_1yw0EIcQMb4d14sl88qJpkX7l7bxqEXnfGZnzvKtcJtTsxlc5wPbddWtw/exec";
@@ -124,7 +128,7 @@ function updateLevelProgress() {
 function updateAnswerBox() {
   const box = $("#answer");
   if (quiz.input === "" || quiz.input === "-") {
-    box.innerHTML = quiz.input === "-" ? "-<span class='placeholder'>?</span>" : "<span class='placeholder'>?</span>";
+    box.innerHTML = quiz.input === "-" ? "-<span class='placeholder'>?</span>" : "<span class='placeholder'>輸入答案 ✨</span>";
   } else {
     box.textContent = quiz.input;
   }
@@ -164,17 +168,20 @@ function onSubmit() {
   if (correct) {
     box.classList.add("ok"); fb.className = "feedback ok";
     if (lvl.phase === "retry") {
-      fb.textContent = "正確，繼續！ ✓";
+      fb.textContent = "✨ 正確！";
       if (lvl.wrongPool.length >= REVIEW_TRIGGER) setTimeout(startReview, 600);
       else setTimeout(renderLevelQuestion, 500);
     } else {
       lvl.streak++;
       updateLevelProgress();
       if (lvl.streak >= GOAL) {
-        fb.textContent = "過關！ 🎉";
-        setTimeout(clearLevel, 800);
+        fb.textContent = "⭐ Perfect！過關！ 🎉";
+        setTimeout(clearLevel, 900);
+      } else if (lvl.streak % 5 === 0) {
+        fb.textContent = `🔥 ${lvl.streak} 連擊！`;
+        setTimeout(renderLevelQuestion, 550);
       } else {
-        fb.textContent = "答對了！ ✓";
+        fb.textContent = praise();
         setTimeout(renderLevelQuestion, 450);
       }
     }
@@ -230,10 +237,10 @@ function submitReview() {
     box.classList.add("ok"); fb.className = "feedback ok";
     lvl.review.pos++;
     if (lvl.review.pos >= lvl.review.queue.length) {
-      fb.textContent = "複習完成，繼續闖關！ ✓";
+      fb.textContent = "🎀 複習完成，繼續闖關！";
       setTimeout(renderLevelQuestion, 800);
     } else {
-      fb.textContent = "答對了！ ✓";
+      fb.textContent = praise();
       setTimeout(loadReviewQuestion, 450);
     }
   } else {
