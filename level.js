@@ -1,8 +1,8 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v8";
+const VERSION = "v9";
 
-// ★ 部署 Apps Script Web App 後，把網址貼在這裡，紀錄就會自動回傳 Google 試算表 ★
-const RECORD_URL = "";
+// ★ Apps Script Web App 網址，紀錄會回傳到 Google 試算表 ★
+const RECORD_URL = "https://script.google.com/macros/s/AKfycbwmV0YlYeg6_1yw0EIcQMb4d14sl88qJpkX7l7bxqEXnfGZnzvKtcJtTsxlc5wPbddWtw/exec";
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
