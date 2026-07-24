@@ -1,5 +1,5 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v14";
+const VERSION = "v15";
 
 // 答對稱讚語（隨機）
 const PRAISES = ["✨ 答對！", "🌟 Good！", "💯 太棒了！", "😊 正確！"];
@@ -458,10 +458,17 @@ document.addEventListener("keydown", (e) => {
   else if (e.key === "Enter") onSubmit();
 });
 
-// 禁止縮放
+// ===== 禁止縮放與上下平移拖曳（鎖定單頁畫面） =====
 ["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
   document.addEventListener(ev, (e) => e.preventDefault()));
-document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
+document.addEventListener("touchmove", (e) => {
+  const target = e.target;
+  if (target.closest && target.closest(".wrong-list, .screen:not(#quiz)")) {
+    return;
+  }
+  e.preventDefault();
+}, { passive: false });
 let lastTouch = 0;
 document.addEventListener("touchend", (e) => {
   const now = Date.now();

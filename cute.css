@@ -30,6 +30,7 @@ h2 { color: var(--accent2); font-weight: 700; }
   background: var(--card);
   border-radius: var(--radius);
   box-shadow: 0 6px 20px rgba(139, 123, 255, .12);
+  padding: 12px 14px;
 }
 
 /* 主按鈕：漸層、圓角 18、hover 上浮、按下微縮 */
@@ -56,12 +57,12 @@ h2 { color: var(--accent2); font-weight: 700; }
 .range-row input:focus { outline: none; border-color: var(--accent); }
 
 /* 關卡選擇：未選白底細框；選取黃框＋淡發光、加大 */
-.levels-select { gap: 12px; }
+.levels-select { gap: 8px; }
 .lvl-toggle span {
   background: #FFFFFF; color: #6E639E; border: 1px solid var(--line);
-  border-radius: 16px; font-weight: 700; font-size: 17px; line-height: 1.55;
-  min-height: 74px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; padding: 12px 8px;
+  border-radius: 14px; font-weight: 700; font-size: 14px; line-height: 1.35;
+  min-height: 52px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 6px 4px;
   box-shadow: 0 3px 10px rgba(139, 123, 255, .08);
   transition: transform .1s;
 }
@@ -72,28 +73,29 @@ h2 { color: var(--accent2); font-weight: 700; }
 .lvl-toggle input:active + span { transform: scale(.97); }
 
 /* 進度／狀態列：字大一點好讀 */
-.progress-wrap { background: #EAE4FF; height: 12px; }
+.progress-wrap { background: #EAE4FF; height: 10px; }
 #progress-bar { background: linear-gradient(90deg, #9C8BFF, #7E6BFF); }
-#progress-text { color: var(--muted); font-size: 14px; font-weight: 600; min-width: auto; white-space: nowrap; }
+#progress-text { color: var(--muted); font-size: 13px; font-weight: 600; min-width: auto; white-space: nowrap; }
 #quit-btn { color: #B0A8CE; }
 
 /* 關卡橫幅 */
 .level-banner {
   background: #FFFFFF; border: 2px solid var(--gold);
-  border-radius: 18px; color: var(--text);
+  border-radius: 14px; color: var(--text);
   box-shadow: 0 4px 14px rgba(139, 123, 255, .15);
+  padding: 6px 12px;
 }
 .level-banner .sub { color: var(--muted); }
 
 /* 題目：加大成為主視覺 */
-.question { color: var(--text); font-size: clamp(42px, 12vw, 58px); }
+.question { color: var(--text); font-size: clamp(28px, 5.5vh, 44px); }
 
 /* 答案框與提示 */
 .answer-box {
   background: #FFFFFF; border: 3px solid var(--line); color: var(--text);
   box-shadow: 0 6px 18px rgba(139, 123, 255, .15);
 }
-.answer-box .placeholder { font-size: 22px; color: #B9B0DA; font-weight: 500; }
+.answer-box .placeholder { font-size: 18px; color: #B9B0DA; font-weight: 500; }
 .answer-box.ok { border-color: var(--ok); animation: pop .4s ease; }
 .answer-box.bad { border-color: var(--bad); animation: shake .4s ease; }
 @keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
@@ -107,7 +109,7 @@ h2 { color: var(--accent2); font-weight: 700; }
 /* 數字鍵盤：白底淡紫框，按下淡紫底 */
 .key {
   background: #FFFFFF; color: var(--text); border: 1.5px solid var(--line);
-  border-radius: 16px; font-weight: 700;
+  border-radius: 14px; font-weight: 700;
   box-shadow: 0 3px 8px rgba(139, 123, 255, .10);
   transition: transform .08s, background .1s;
 }
@@ -126,16 +128,16 @@ h2 { color: var(--accent2); font-weight: 700; }
 .score-detail { color: #666666; }
 .record-status.ok { color: var(--ok); }
 .record-status.bad { color: var(--bad); }
-.wrong-item { box-shadow: 0 3px 10px rgba(139, 123, 255, .1); }
+.wrong-list { box-shadow: 0 3px 10px rgba(139, 123, 255, .1); }
 
 .app-version { color: #B7AFD4; }
 
 /* 吉祥物：妍妍貓 */
-.mascot { width: 76px; margin: 0 auto 8px; }
+.mascot { width: clamp(48px, 8.5vh, 64px); margin: 0 auto 2px; flex-shrink: 0; }
 .mascot svg { width: 100%; height: auto; display: block; animation: bob 2.4s ease-in-out infinite; transform-origin: 50% 100%; }
 .mascot.react svg { animation: hop .5s ease; }
 .mascot.react-big svg { animation: hop-big .6s ease; }
-.mascot-win { width: 132px; margin: 0 auto 6px; }
+.mascot-win { width: clamp(72px, 12vh, 100px); margin: 0 auto 4px; flex-shrink: 0; }
 .mascot-win svg { width: 100%; height: auto; display: block; animation: hop-big .7s ease; transform-origin: 50% 100%; }
 @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @keyframes hop {
@@ -159,3 +161,4 @@ h2 { color: var(--accent2); font-weight: 700; }
   animation: confetti-fall 2.2s linear forwards;
 }
 @keyframes confetti-fall { to { top: 105vh; transform: rotate(720deg); } }
+

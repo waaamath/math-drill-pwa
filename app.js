@@ -1,5 +1,5 @@
 // ===== 整數四則運算練習 PWA =====
-const VERSION = "v14";
+const VERSION = "v15";
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
@@ -434,12 +434,16 @@ document.addEventListener("keydown", (e) => {
   else if (e.key === "Enter") onSubmit();
 });
 
-// ===== 禁止縮放（iOS Safari 會忽略 viewport 的 user-scalable，需再攔截手勢） =====
+// ===== 禁止縮放與上下平移拖曳（鎖定單頁畫面） =====
 ["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
   document.addEventListener(ev, (e) => e.preventDefault()));
-// 雙指縮放
+
 document.addEventListener("touchmove", (e) => {
-  if (e.touches.length > 1) e.preventDefault();
+  const target = e.target;
+  if (target.closest && target.closest(".wrong-list, .screen:not(#quiz)")) {
+    return;
+  }
+  e.preventDefault();
 }, { passive: false });
 // 雙擊放大
 let lastTouch = 0;
