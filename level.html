@@ -4,15 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#4f46e5" />
-  <title>整數四則運算練習</title>
+  <title>整數加減過關</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="manifest" href="manifest-level.webmanifest" />
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="四則運算" />
+  <meta name="apple-mobile-web-app-title" content="過關" />
 
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -21,17 +20,9 @@
 
     <!-- ===== 設定畫面 ===== -->
     <section id="setup" class="screen active">
-      <h1>整數四則運算練習</h1>
+      <h1>整數加減過關</h1>
 
       <div class="card">
-        <div class="mode-toggle">
-          <button class="mode-btn active" data-mode="normal">一般練習</button>
-          <button class="mode-btn" data-mode="level">過關模式</button>
-        </div>
-        <p id="mode-hint" class="mode-hint"></p>
-      </div>
-
-      <div class="card hidden" id="levels-card">
         <h2>選擇要練的關卡</h2>
         <div id="levels-select" class="levels-select"></div>
         <div class="levels-actions">
@@ -40,18 +31,8 @@
         </div>
       </div>
 
-      <div class="card" id="ops-card">
-        <h2>選擇運算</h2>
-        <div class="ops">
-          <label class="op-toggle"><input type="checkbox" value="+" checked><span>＋ 加</span></label>
-          <label class="op-toggle"><input type="checkbox" value="-" checked><span>－ 減</span></label>
-          <label class="op-toggle"><input type="checkbox" value="×" checked><span>× 乘</span></label>
-          <label class="op-toggle"><input type="checkbox" value="÷"><span>÷ 除</span></label>
-        </div>
-      </div>
-
       <div class="card">
-        <h2>第一個數字範圍</h2>
+        <h2>第一個數字大小範圍</h2>
         <div class="range-row">
           <label>最小 <input type="number" id="minA" value="1"></label>
           <label>最大 <input type="number" id="maxA" value="20"></label>
@@ -59,42 +40,30 @@
       </div>
 
       <div class="card">
-        <h2>第二個數字範圍</h2>
+        <h2>第二個數字大小範圍</h2>
         <div class="range-row">
           <label>最小 <input type="number" id="minB" value="1"></label>
           <label>最大 <input type="number" id="maxB" value="20"></label>
         </div>
       </div>
 
-      <div class="card" id="count-card">
-        <h2>題數</h2>
-        <div class="count-row">
-          <button class="count-btn" data-count="10">10 題</button>
-          <button class="count-btn active" data-count="20">20 題</button>
-          <button class="count-btn" data-count="30">30 題</button>
-        </div>
-      </div>
-
       <p id="setup-error" class="error"></p>
-      <button id="start-btn" class="primary big">開始練習</button>
-      <a class="page-link" href="level.html">➜ 前往「加減過關」獨立版（含成績紀錄）</a>
+      <button id="start-btn" class="primary big">開始過關</button>
     </section>
 
-    <!-- 過關模式的關卡橫幅（一般模式隱藏） -->
-
-    <!-- ===== 練習畫面 ===== -->
+    <!-- ===== 過關畫面 ===== -->
     <section id="quiz" class="screen">
       <header class="quiz-top">
         <button id="quit-btn" class="ghost">✕</button>
         <div class="progress-wrap"><div id="progress-bar"></div></div>
-        <span id="progress-text">1 / 20</span>
+        <span id="progress-text">連續 0 / 30</span>
       </header>
 
-      <div id="level-banner" class="level-banner" hidden></div>
+      <div id="level-banner" class="level-banner"></div>
       <div id="review-panel" class="review-panel" hidden></div>
 
       <div class="question-area">
-        <div id="question" class="question">2 ＋ 3 =</div>
+        <div id="question" class="question"></div>
         <div id="answer" class="answer-box"><span class="placeholder">?</span></div>
         <div id="feedback" class="feedback"></div>
       </div>
@@ -119,9 +88,10 @@
 
     <!-- ===== 結果畫面 ===== -->
     <section id="result" class="screen">
-      <h1>練習完成！</h1>
-      <div id="score" class="score">0 / 0</div>
+      <h1 id="result-title">練習結束</h1>
+      <div id="score" class="score"></div>
       <div id="score-detail" class="score-detail"></div>
+      <div id="record-status" class="record-status"></div>
       <div id="wrong-list" class="wrong-list"></div>
       <button id="again-btn" class="primary big">再一次</button>
       <button id="home-btn" class="ghost big">回設定</button>
@@ -131,6 +101,6 @@
 
   </div>
 
-  <script src="app.js"></script>
+  <script src="level.js"></script>
 </body>
 </html>

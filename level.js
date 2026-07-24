@@ -1,0 +1,366 @@
+// ===== 整數加減過關（獨立頁）=====
+const VERSION = "v8";
+
+// ★ 部署 Apps Script Web App 後，把網址貼在這裡，紀錄就會自動回傳 Google 試算表 ★
+const RECORD_URL = "";
+
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+// ---- 關卡定義：7 種正負組合 + 第 8 關混合 ----
+const LEVELS = [
+  { name: "正 － 正", s1: 1,  op: "-", s2: 1 },
+  { name: "負 ＋ 正", s1: -1, op: "+", s2: 1 },
+  { name: "負 － 正", s1: -1, op: "-", s2: 1 },
+  { name: "正 － 負", s1: 1,  op: "-", s2: -1 },
+  { name: "負 － 負", s1: -1, op: "-", s2: -1 },
+  { name: "正 ＋ 負", s1: 1,  op: "+", s2: -1 },
+  { name: "負 ＋ 負", s1: -1, op: "+", s2: -1 },
+];
+const GOAL = 30;                 // 每關需連續答對的題數
+const REVIEW_TRIGGER = 5;        // 累積錯幾題就進錯題複習
+const TOTAL_LEVELS = LEVELS.length + 1;
+
+function levelName(idx) {
+  return idx < LEVELS.length ? LEVELS[idx].name : "混合（前 7 關綜合）";
+}
+
+// ---- 狀態 ----
+let settings = { minA: 1, maxA: 20, minB: 1, maxB: 20 };
+let quiz = { input: "" };
+let lvl = { plan: [], step: 0, idx: 0, streak: 0, phase: "normal", q: null, wrongPool: [], review: null };
+// 本次使用的統計紀錄
+let stats = null;
+
+// ---- 工具 ----
+function show(id) {
+  $$(".screen").forEach((s) => s.classList.remove("active"));
+  $(`#${id}`).classList.add("active");
+}
+function randInt(min, max) {
+  min = Math.ceil(min); max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+// 第一個數字直接顯示、第二個數字若為負數加括號
+function fmt(n) { return n < 0 ? `(${n})` : `${n}`; }
+function showSetupError(msg) { $("#setup-error").textContent = msg; }
+
+// ---- 出題 ----
+function magFrom(min, max) {
+  const hi = Math.max(Math.abs(min), Math.abs(max));
+  return randInt(1, Math.max(1, hi));
+}
+function pickCombo() {
+  return lvl.idx < LEVELS.length ? LEVELS[lvl.idx] : LEVELS[randInt(0, LEVELS.length - 1)];
+}
+function makeLevelQuestion() {
+  const L = pickCombo();
+  const a = L.s1 * magFrom(settings.minA, settings.maxA);
+  const b = L.s2 * magFrom(settings.minB, settings.maxB);
+  const answer = L.op === "+" ? a + b : a - b;
+  return { a, b, op: L.op, answer, text: `${a} ${L.op} ${fmt(b)} =`, levelNo: lvl.idx + 1 };
+}
+
+// ---- 建立關卡勾選清單 ----
+function buildLevelSelect() {
+  const box = $("#levels-select");
+  box.innerHTML = "";
+  for (let i = 0; i < TOTAL_LEVELS; i++) {
+    const label = document.createElement("label");
+    label.className = "lvl-toggle";
+    label.innerHTML = `<input type="checkbox" value="${i}" checked><span>第 ${i + 1} 關<br>${levelName(i)}</span>`;
+    box.appendChild(label);
+  }
+}
+
+// ---- 開始 ----
+function start() {
+  const minA = parseInt($("#minA").value, 10);
+  const maxA = parseInt($("#maxA").value, 10);
+  const minB = parseInt($("#minB").value, 10);
+  const maxB = parseInt($("#maxB").value, 10);
+  if ([minA, maxA, minB, maxB].some((n) => Number.isNaN(n))) return showSetupError("範圍必須是數字");
+  if (minA > maxA || minB > maxB) return showSetupError("最小值不能大於最大值");
+
+  const plan = [...$$("#levels-select input:checked")]
+    .map((c) => parseInt(c.value, 10)).sort((a, b) => a - b);
+  if (plan.length === 0) return showSetupError("請至少勾選一關");
+
+  settings = { minA, maxA, minB, maxB };
+  lvl = { plan, step: 0, idx: plan[0], streak: 0, phase: "normal", q: null, wrongPool: [], review: null };
+  stats = { startTime: Date.now(), plan: plan.map((i) => i + 1), answered: 0, wrong: 0, wrongList: [], reachedLevel: plan[0] + 1 };
+
+  showSetupError("");
+  show("quiz");
+  renderLevelQuestion();
+}
+
+// ---- 一般答題 ----
+function renderLevelQuestion() {
+  lvl.phase = "normal";
+  lvl.q = makeLevelQuestion();
+  quiz.input = "";
+  $("#review-panel").hidden = true;
+  $("#level-banner").innerHTML =
+    `第 ${lvl.idx + 1} 關　${levelName(lvl.idx)}<span class="sub">進度 ${lvl.step + 1} / ${lvl.plan.length} 關</span>`;
+  $("#question").textContent = lvl.q.text;
+  updateAnswerBox();
+  $("#feedback").textContent = "";
+  $("#feedback").className = "feedback";
+  $("#answer").className = "answer-box";
+  updateLevelProgress();
+}
+function updateLevelProgress() {
+  if (lvl.phase === "review") {
+    $("#progress-bar").style.width = (lvl.review.pos / lvl.review.queue.length * 100) + "%";
+    $("#progress-text").textContent = `複習 ${lvl.review.pos} / ${lvl.review.queue.length}`;
+  } else {
+    $("#progress-bar").style.width = (lvl.streak / GOAL * 100) + "%";
+    $("#progress-text").textContent = `連續 ${lvl.streak} / ${GOAL}　錯 ${lvl.wrongPool.length}/${REVIEW_TRIGGER}`;
+  }
+}
+
+// ---- 輸入 ----
+function updateAnswerBox() {
+  const box = $("#answer");
+  if (quiz.input === "" || quiz.input === "-") {
+    box.innerHTML = quiz.input === "-" ? "-<span class='placeholder'>?</span>" : "<span class='placeholder'>?</span>";
+  } else {
+    box.textContent = quiz.input;
+  }
+}
+function pressKey(key) {
+  if (key === "back") quiz.input = quiz.input.slice(0, -1);
+  else if (key === "sign") quiz.input = quiz.input.startsWith("-") ? quiz.input.slice(1) : "-" + quiz.input;
+  else {
+    if (quiz.input === "0") quiz.input = key;
+    else if (quiz.input === "-0") quiz.input = "-" + key;
+    else if (quiz.input.replace("-", "").length < 6) quiz.input += key;
+  }
+  updateAnswerBox();
+}
+
+// ---- 記一筆作答 ----
+function recordAnswer(q, val, correct) {
+  stats.answered++;
+  if (!correct) {
+    stats.wrong++;
+    stats.wrongList.push({ 題目: q.text.replace(" =", "").trim(), 你的答案: val, 正確答案: q.answer, 關卡: q.levelNo });
+  }
+}
+
+// ---- 送出 ----
+function onSubmit() {
+  if (quiz.input === "" || quiz.input === "-") return;
+  if (lvl.phase === "review") return submitReview();
+
+  const val = parseInt(quiz.input, 10);
+  const q = lvl.q;
+  const box = $("#answer");
+  const fb = $("#feedback");
+  const correct = val === q.answer;
+  recordAnswer(q, val, correct);
+
+  if (correct) {
+    box.classList.add("ok"); fb.className = "feedback ok";
+    if (lvl.phase === "retry") {
+      fb.textContent = "正確，繼續！ ✓";
+      if (lvl.wrongPool.length >= REVIEW_TRIGGER) setTimeout(startReview, 600);
+      else setTimeout(renderLevelQuestion, 500);
+    } else {
+      lvl.streak++;
+      updateLevelProgress();
+      if (lvl.streak >= GOAL) {
+        fb.textContent = "過關！ 🎉";
+        setTimeout(clearLevel, 800);
+      } else {
+        fb.textContent = "答對了！ ✓";
+        setTimeout(renderLevelQuestion, 450);
+      }
+    }
+  } else {
+    box.classList.add("bad"); fb.className = "feedback bad";
+    lvl.streak = 0;
+    if (lvl.phase !== "retry") lvl.wrongPool.push(q);
+    lvl.phase = "retry";
+    updateLevelProgress();
+    fb.textContent = `答錯，正確答案是 ${q.answer}，請重新輸入`;
+    clearInputSoon(box);
+  }
+}
+
+// ---- 錯題複習 ----
+function startReview() {
+  lvl.phase = "review";
+  lvl.review = { queue: lvl.wrongPool.slice(), pos: 0 };
+  lvl.wrongPool = [];
+  $("#review-panel").hidden = false;
+  loadReviewQuestion();
+}
+function loadReviewQuestion() {
+  lvl.q = lvl.review.queue[lvl.review.pos];
+  quiz.input = "";
+  renderReviewList();
+  $("#question").textContent = lvl.q.text;
+  updateAnswerBox();
+  $("#feedback").textContent = "";
+  $("#feedback").className = "feedback";
+  $("#answer").className = "answer-box";
+  updateLevelProgress();
+}
+function renderReviewList() {
+  const items = lvl.review.queue.map((q, i) => {
+    const cls = i < lvl.review.pos ? "rv-done" : (i === lvl.review.pos ? "rv-current" : "");
+    const mark = i < lvl.review.pos ? " ✓" : "";
+    return `<div class="rv-item ${cls}">${q.text.replace(" =", "")}${mark}</div>`;
+  }).join("");
+  $("#review-panel").innerHTML =
+    `<div class="review-title">錯題複習 — 這 ${lvl.review.queue.length} 題全部答對才繼續</div>` +
+    `<div class="review-items">${items}</div>`;
+}
+function submitReview() {
+  const val = parseInt(quiz.input, 10);
+  const q = lvl.q;
+  const box = $("#answer");
+  const fb = $("#feedback");
+  const correct = val === q.answer;
+  recordAnswer(q, val, correct);
+
+  if (correct) {
+    box.classList.add("ok"); fb.className = "feedback ok";
+    lvl.review.pos++;
+    if (lvl.review.pos >= lvl.review.queue.length) {
+      fb.textContent = "複習完成，繼續闖關！ ✓";
+      setTimeout(renderLevelQuestion, 800);
+    } else {
+      fb.textContent = "答對了！ ✓";
+      setTimeout(loadReviewQuestion, 450);
+    }
+  } else {
+    box.classList.add("bad"); fb.className = "feedback bad";
+    fb.textContent = `答錯，正確答案是 ${q.answer}，請重新輸入`;
+    clearInputSoon(box);
+  }
+}
+function clearInputSoon(box) {
+  setTimeout(() => { quiz.input = ""; updateAnswerBox(); box.className = "answer-box"; }, 1000);
+}
+
+// ---- 關卡推進 ----
+function clearLevel() {
+  lvl.step++;
+  lvl.streak = 0;
+  lvl.wrongPool = [];
+  stats.reachedLevel = lvl.idx + 1;
+  if (lvl.step >= lvl.plan.length) finish(true);
+  else { lvl.idx = lvl.plan[lvl.step]; stats.reachedLevel = lvl.idx + 1; renderLevelQuestion(); }
+}
+
+// ---- 結束並回傳紀錄 ----
+function finish(completed) {
+  const elapsedSec = Math.round((Date.now() - stats.startTime) / 1000);
+  show("result");
+  $("#result-title").textContent = completed ? "全部過關！" : "本次結束";
+  $("#score").textContent = completed ? "全破 🏆" : `到第 ${stats.reachedLevel} 關`;
+  $("#score-detail").innerHTML =
+    `作答 ${stats.answered} 題　答錯 ${stats.wrong} 題<br>用時 ${formatTime(elapsedSec)}`;
+
+  // 錯題清單
+  const list = $("#wrong-list");
+  list.innerHTML = "";
+  if (stats.wrongList.length === 0) {
+    list.innerHTML = "<div class='wrong-item' style='justify-content:center;color:var(--ok)'>沒有錯題，太棒了！ 🎉</div>";
+  } else {
+    stats.wrongList.forEach((w) => {
+      const div = document.createElement("div");
+      div.className = "wrong-item";
+      div.innerHTML = `<span>${w.題目} =</span><span><span class="you">${w.你的答案}</span> → <span class="correct">${w.正確答案}</span></span>`;
+      list.appendChild(div);
+    });
+  }
+
+  sendRecord(completed, elapsedSec);
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return m > 0 ? `${m} 分 ${s} 秒` : `${s} 秒`;
+}
+
+// ---- 回傳到 Google 試算表 ----
+function sendRecord(completed, elapsedSec) {
+  const statusEl = $("#record-status");
+  const payload = {
+    版本: VERSION,
+    時間: new Date().toISOString(),
+    完成: completed ? "全破" : "中途結束",
+    選擇關卡: stats.plan.join(","),
+    到達關卡: stats.reachedLevel,
+    作答數: stats.answered,
+    答錯數: stats.wrong,
+    用時秒: elapsedSec,
+    錯題: stats.wrongList,
+  };
+
+  if (!RECORD_URL) {
+    statusEl.textContent = "（尚未設定回傳網址，紀錄未上傳）";
+    statusEl.className = "record-status muted";
+    return;
+  }
+  statusEl.textContent = "紀錄回傳中…";
+  statusEl.className = "record-status muted";
+  fetch(RECORD_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload),
+  })
+    .then(() => { statusEl.textContent = "紀錄已回傳 ✓"; statusEl.className = "record-status ok"; })
+    .catch(() => { statusEl.textContent = "紀錄回傳失敗（可稍後再試）"; statusEl.className = "record-status bad"; });
+}
+
+// ---- 中途離開：有作答就記一筆，再回設定 ----
+function quit() {
+  if (stats && stats.answered > 0) finish(false);
+  else show("setup");
+}
+
+// ===== 事件綁定 =====
+$("#start-btn").addEventListener("click", start);
+$("#quit-btn").addEventListener("click", quit);
+$("#submit-btn").addEventListener("click", onSubmit);
+$("#again-btn").addEventListener("click", start);
+$("#home-btn").addEventListener("click", () => show("setup"));
+$("#lvl-all").addEventListener("click", () => $$("#levels-select input").forEach((c) => (c.checked = true)));
+$("#lvl-none").addEventListener("click", () => $$("#levels-select input").forEach((c) => (c.checked = false)));
+$$(".key").forEach((k) => k.addEventListener("click", () => pressKey(k.dataset.key)));
+
+document.addEventListener("keydown", (e) => {
+  if (!$("#quiz").classList.contains("active")) return;
+  if (e.key >= "0" && e.key <= "9") pressKey(e.key);
+  else if (e.key === "-") pressKey("sign");
+  else if (e.key === "Backspace") pressKey("back");
+  else if (e.key === "Enter") onSubmit();
+});
+
+// 禁止縮放
+["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
+  document.addEventListener(ev, (e) => e.preventDefault()));
+document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+let lastTouch = 0;
+document.addEventListener("touchend", (e) => {
+  const now = Date.now();
+  if (now - lastTouch <= 300) e.preventDefault();
+  lastTouch = now;
+}, { passive: false });
+
+// 初始化
+buildLevelSelect();
+$("#app-version").textContent = `整數加減過關　${VERSION}`;
+
+// Service Worker
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch((err) => console.warn("SW 註冊失敗", err));
+  });
+}

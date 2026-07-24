@@ -30,6 +30,11 @@ html, body {
 /* 數字輸入框仍可選取 */
 input { user-select: text; -webkit-user-select: text; }
 
+.page-link {
+  display: block; text-align: center; color: var(--accent2);
+  font-size: 15px; font-weight: 700; text-decoration: none; padding: 6px;
+}
+
 /* 版本註記 */
 .app-version {
   text-align: center; color: var(--muted); font-size: 12px;
@@ -188,7 +193,11 @@ button { cursor: pointer; font-family: inherit; }
 
 /* ===== 結果畫面 ===== */
 .score { text-align: center; font-size: 56px; font-weight: 800; color: var(--accent2); }
-.score-detail { text-align: center; color: var(--muted); font-size: 18px; }
+.score-detail { text-align: center; color: var(--muted); font-size: 18px; line-height: 1.6; }
+.record-status { text-align: center; font-size: 14px; }
+.record-status.muted { color: var(--muted); }
+.record-status.ok { color: var(--ok); }
+.record-status.bad { color: var(--bad); }
 .wrong-list { display: flex; flex-direction: column; gap: 8px; }
 .wrong-item {
   background: var(--card); border-radius: 12px; padding: 12px 16px;
