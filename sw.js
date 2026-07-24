@@ -1,5 +1,5 @@
 // Service Worker — 離線快取
-const CACHE = "math-drill-v11";
+const CACHE = "math-drill-v12";
 const ASSETS = [
   "./",
   "./index.html",
@@ -12,7 +12,10 @@ const ASSETS = [
   "./manifest-level.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",
-  "./icons/icon-512.png"
+  "./icons/icon-512.png",
+  "./icons/icon-level.svg",
+  "./icons/icon-level-192.png",
+  "./icons/icon-level-512.png"
 ];
 
 self.addEventListener("install", (e) => {

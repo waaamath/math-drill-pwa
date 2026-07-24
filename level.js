@@ -1,9 +1,35 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v11";
+const VERSION = "v12";
 
 // 答對稱讚語（隨機）
 const PRAISES = ["✨ 答對！", "🌟 Good！", "💯 太棒了！", "😊 正確！"];
 function praise() { return PRAISES[Math.floor(Math.random() * PRAISES.length)]; }
+
+// 吉祥物：紫色小貓「妍妍貓」
+const MASCOT_SVG = `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <path d="M28 42 L36 12 L60 34 Z" fill="#8B7BFF"/>
+  <path d="M92 42 L84 12 L60 34 Z" fill="#8B7BFF"/>
+  <path d="M35 34 L39 20 L50 32 Z" fill="#FF9EC4"/>
+  <path d="M85 34 L81 20 L70 32 Z" fill="#FF9EC4"/>
+  <ellipse cx="60" cy="68" rx="42" ry="38" fill="#9C8BFF"/>
+  <ellipse cx="60" cy="74" rx="30" ry="24" fill="#EFEAFF"/>
+  <circle cx="47" cy="64" r="6.5" fill="#3E2E6E"/>
+  <circle cx="73" cy="64" r="6.5" fill="#3E2E6E"/>
+  <circle cx="49" cy="61.5" r="2.2" fill="#fff"/>
+  <circle cx="75" cy="61.5" r="2.2" fill="#fff"/>
+  <circle cx="38" cy="76" r="6" fill="#FF9EC4" opacity=".75"/>
+  <circle cx="82" cy="76" r="6" fill="#FF9EC4" opacity=".75"/>
+  <path d="M54 76 q6 6 12 0" stroke="#3E2E6E" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <path d="M60 70 l-3 4 h6 Z" fill="#FF9EC4"/>
+</svg>`;
+
+function mascotReact(big) {
+  const m = document.getElementById("mascot");
+  if (!m) return;
+  m.classList.remove("react", "react-big");
+  void m.offsetWidth;                 // 強制 reflow 讓動畫重播
+  m.classList.add(big ? "react-big" : "react");
+}
 
 // ★ Apps Script Web App 網址，紀錄會回傳到 Google 試算表 ★
 const RECORD_URL = "https://script.google.com/macros/s/AKfycbwmV0YlYeg6_1yw0EIcQMb4d14sl88qJpkX7l7bxqEXnfGZnzvKtcJtTsxlc5wPbddWtw/exec";
@@ -169,6 +195,7 @@ function onSubmit() {
     box.classList.add("ok"); fb.className = "feedback ok";
     if (lvl.phase === "retry") {
       fb.textContent = "✨ 正確！";
+      mascotReact(false);
       if (lvl.wrongPool.length >= REVIEW_TRIGGER) setTimeout(startReview, 600);
       else setTimeout(renderLevelQuestion, 500);
     } else {
@@ -176,12 +203,15 @@ function onSubmit() {
       updateLevelProgress();
       if (lvl.streak >= GOAL) {
         fb.textContent = "⭐ Perfect！過關！ 🎉";
+        mascotReact(true);
         setTimeout(clearLevel, 900);
       } else if (lvl.streak % 5 === 0) {
         fb.textContent = `🔥 ${lvl.streak} 連擊！`;
+        mascotReact(true);
         setTimeout(renderLevelQuestion, 550);
       } else {
         fb.textContent = praise();
+        mascotReact(false);
         setTimeout(renderLevelQuestion, 450);
       }
     }
@@ -238,9 +268,11 @@ function submitReview() {
     lvl.review.pos++;
     if (lvl.review.pos >= lvl.review.queue.length) {
       fb.textContent = "🎀 複習完成，繼續闖關！";
+      mascotReact(true);
       setTimeout(renderLevelQuestion, 800);
     } else {
       fb.textContent = praise();
+      mascotReact(false);
       setTimeout(loadReviewQuestion, 450);
     }
   } else {
@@ -269,6 +301,7 @@ function finish(completed) {
   show("result");
   $("#result-title").textContent = completed ? "全部過關！ 🎉" : "本次結束";
   $("#score").textContent = completed ? "全破 🏆" : `到第 ${stats.reachedLevel} 關`;
+  $("#mascot-win").innerHTML = completed ? MASCOT_SVG : "";
   if (completed) confetti();
   $("#score-detail").innerHTML =
     `作答 ${stats.answered} 題　答錯 ${stats.wrong} 題<br>用時 ${formatTime(elapsedSec)}`;
@@ -378,6 +411,7 @@ document.addEventListener("touchend", (e) => {
 
 // 初始化
 buildLevelSelect();
+$("#mascot").innerHTML = MASCOT_SVG;
 $("#app-version").textContent = `整數加減過關　${VERSION}`;
 
 // Service Worker

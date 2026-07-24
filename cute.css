@@ -130,6 +130,28 @@ h2 { color: var(--accent2); font-weight: 700; }
 
 .app-version { color: #B7AFD4; }
 
+/* 吉祥物：妍妍貓 */
+.mascot { width: 76px; margin: 0 auto 8px; }
+.mascot svg { width: 100%; height: auto; display: block; animation: bob 2.4s ease-in-out infinite; transform-origin: 50% 100%; }
+.mascot.react svg { animation: hop .5s ease; }
+.mascot.react-big svg { animation: hop-big .6s ease; }
+.mascot-win { width: 132px; margin: 0 auto 6px; }
+.mascot-win svg { width: 100%; height: auto; display: block; animation: hop-big .7s ease; transform-origin: 50% 100%; }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes hop {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-18px) scale(1.08, .94); }
+  60% { transform: translateY(0) scale(.96, 1.04); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes hop-big {
+  0% { transform: translateY(0) scale(1) rotate(0); }
+  25% { transform: translateY(-28px) scale(1.14, .9) rotate(-6deg); }
+  55% { transform: translateY(0) scale(.92, 1.08) rotate(4deg); }
+  75% { transform: translateY(-8px) scale(1.03) rotate(0); }
+  100% { transform: translateY(0) scale(1); }
+}
+
 /* Confetti（全破時） */
 .confetti-piece {
   position: fixed; top: -20px; width: 10px; height: 14px; border-radius: 2px;

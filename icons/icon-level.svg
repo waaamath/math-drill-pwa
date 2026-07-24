@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9C8BFF"/>
+      <stop offset="1" stop-color="#7E6BFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- 星星 -->
+  <path d="M256 88 L269 129 L312 129 L277 154 L290 196 L256 170 L222 196 L235 154 L200 129 L243 129 Z" fill="#FFD76A"/>
+  <!-- 閃光 -->
+  <circle cx="150" cy="180" r="13" fill="#fff"/>
+  <circle cx="384" cy="168" r="9" fill="#fff"/>
+  <circle cx="196" cy="392" r="8" fill="#fff"/>
+  <circle cx="372" cy="392" r="7" fill="#fff"/>
+
+  <!-- 手把 -->
+  <g fill="#fff">
+    <circle cx="150" cy="332" r="58"/>
+    <circle cx="362" cy="332" r="58"/>
+    <rect x="112" y="214" width="288" height="152" rx="74"/>
+  </g>
+  <!-- 十字鍵 -->
+  <g fill="#7E6BFF">
+    <rect x="170" y="258" width="30" height="62" rx="9"/>
+    <rect x="154" y="274" width="62" height="30" rx="9"/>
+  </g>
+  <!-- 按鈕 -->
+  <circle cx="330" cy="266" r="17" fill="#7E6BFF"/>
+  <circle cx="364" cy="300" r="17" fill="#FF9EC4"/>
+</svg>
