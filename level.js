@@ -1,34 +1,64 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v12";
+const VERSION = "v13";
 
 // 答對稱讚語（隨機）
 const PRAISES = ["✨ 答對！", "🌟 Good！", "💯 太棒了！", "😊 正確！"];
 function praise() { return PRAISES[Math.floor(Math.random() * PRAISES.length)]; }
 
-// 吉祥物：紫色小貓「妍妍貓」
-const MASCOT_SVG = `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-  <path d="M28 42 L36 12 L60 34 Z" fill="#8B7BFF"/>
-  <path d="M92 42 L84 12 L60 34 Z" fill="#8B7BFF"/>
-  <path d="M35 34 L39 20 L50 32 Z" fill="#FF9EC4"/>
-  <path d="M85 34 L81 20 L70 32 Z" fill="#FF9EC4"/>
-  <ellipse cx="60" cy="68" rx="42" ry="38" fill="#9C8BFF"/>
-  <ellipse cx="60" cy="74" rx="30" ry="24" fill="#EFEAFF"/>
-  <circle cx="47" cy="64" r="6.5" fill="#3E2E6E"/>
-  <circle cx="73" cy="64" r="6.5" fill="#3E2E6E"/>
-  <circle cx="49" cy="61.5" r="2.2" fill="#fff"/>
-  <circle cx="75" cy="61.5" r="2.2" fill="#fff"/>
-  <circle cx="38" cy="76" r="6" fill="#FF9EC4" opacity=".75"/>
-  <circle cx="82" cy="76" r="6" fill="#FF9EC4" opacity=".75"/>
-  <path d="M54 76 q6 6 12 0" stroke="#3E2E6E" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-  <path d="M60 70 l-3 4 h6 Z" fill="#FF9EC4"/>
-</svg>`;
+// 吉祥物：紫色小貓「妍妍貓」，依心情切換表情
+function star(cx, cy, s) {
+  return `<path transform="translate(${cx} ${cy}) scale(${s})" fill="#FFD76A"
+    d="M0 -1 L0.25 -0.34 L0.95 -0.31 L0.4 0.13 L0.59 0.81 L0 0.42 L-0.59 0.81 L-0.4 0.13 L-0.95 -0.31 L-0.25 -0.34 Z"/>`;
+}
+function mascotSvg(mood) {
+  const base = `
+    <path d="M28 42 L36 12 L60 34 Z" fill="#8B7BFF"/>
+    <path d="M92 42 L84 12 L60 34 Z" fill="#8B7BFF"/>
+    <path d="M35 34 L39 20 L50 32 Z" fill="#FF9EC4"/>
+    <path d="M85 34 L81 20 L70 32 Z" fill="#FF9EC4"/>
+    <ellipse cx="60" cy="68" rx="42" ry="38" fill="#9C8BFF"/>
+    <ellipse cx="60" cy="74" rx="30" ry="24" fill="#EFEAFF"/>
+    <circle cx="38" cy="76" r="6" fill="#FF9EC4" opacity=".75"/>
+    <circle cx="82" cy="76" r="6" fill="#FF9EC4" opacity=".75"/>
+    <path d="M60 70 l-3 4 h6 Z" fill="#FF9EC4"/>`;
+  const eyesOpen = `<circle cx="47" cy="64" r="6.5" fill="#3E2E6E"/><circle cx="73" cy="64" r="6.5" fill="#3E2E6E"/>
+    <circle cx="49" cy="61.5" r="2.2" fill="#fff"/><circle cx="75" cy="61.5" r="2.2" fill="#fff"/>`;
+  let face, extra = "";
 
-function mascotReact(big) {
+  if (mood === "happy" || mood === "combo" || mood === "win") {
+    // 瞇眼笑 + 開心大嘴
+    face = `<path d="M41 66 q6 -7 12 0" stroke="#3E2E6E" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <path d="M67 66 q6 -7 12 0" stroke="#3E2E6E" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <path d="M52 74 q8 9 16 0" stroke="#3E2E6E" stroke-width="2.8" fill="none" stroke-linecap="round"/>`;
+  } else if (mood === "confused") {
+    // 疑惑：一大一小眼、波浪嘴、藍色汗滴
+    face = `<circle cx="47" cy="64" r="6.5" fill="#3E2E6E"/><circle cx="49" cy="61.5" r="2.2" fill="#fff"/>
+      <circle cx="73" cy="65" r="3.6" fill="#3E2E6E"/>
+      <path d="M53 78 q3 -4 6 0 q3 4 6 0" stroke="#3E2E6E" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+    extra = `<path d="M94 42 q-5 7 0 9 q5 -2 0 -9 Z" fill="#7EC8FF"/>`;
+  } else {
+    // idle
+    face = eyesOpen + `<path d="M54 76 q6 6 12 0" stroke="#3E2E6E" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+  }
+  if (mood === "combo" || mood === "win") {
+    extra += star(40, 10, 6) + star(60, 4, 7) + star(80, 10, 6);
+  }
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${base}${face}${extra}</svg>`;
+}
+
+// 顯示表情 + 跳動；delay 後回到 idle
+function mascotReact(mood, big) {
   const m = document.getElementById("mascot");
   if (!m) return;
+  m.innerHTML = mascotSvg(mood);
   m.classList.remove("react", "react-big");
   void m.offsetWidth;                 // 強制 reflow 讓動畫重播
-  m.classList.add(big ? "react-big" : "react");
+  if (mood !== "confused") m.classList.add(big ? "react-big" : "react");
+  clearTimeout(m._revert);
+  m._revert = setTimeout(() => {
+    m.innerHTML = mascotSvg("idle");
+    m.classList.remove("react", "react-big");
+  }, big ? 1100 : 900);
 }
 
 // ★ Apps Script Web App 網址，紀錄會回傳到 Google 試算表 ★
@@ -195,7 +225,7 @@ function onSubmit() {
     box.classList.add("ok"); fb.className = "feedback ok";
     if (lvl.phase === "retry") {
       fb.textContent = "✨ 正確！";
-      mascotReact(false);
+      mascotReact("happy", false);
       if (lvl.wrongPool.length >= REVIEW_TRIGGER) setTimeout(startReview, 600);
       else setTimeout(renderLevelQuestion, 500);
     } else {
@@ -203,15 +233,15 @@ function onSubmit() {
       updateLevelProgress();
       if (lvl.streak >= GOAL) {
         fb.textContent = "⭐ Perfect！過關！ 🎉";
-        mascotReact(true);
+        mascotReact("combo", true);
         setTimeout(clearLevel, 900);
       } else if (lvl.streak % 5 === 0) {
         fb.textContent = `🔥 ${lvl.streak} 連擊！`;
-        mascotReact(true);
+        mascotReact("combo", true);
         setTimeout(renderLevelQuestion, 550);
       } else {
         fb.textContent = praise();
-        mascotReact(false);
+        mascotReact("happy", false);
         setTimeout(renderLevelQuestion, 450);
       }
     }
@@ -221,6 +251,7 @@ function onSubmit() {
     if (lvl.phase !== "retry") lvl.wrongPool.push(q);
     lvl.phase = "retry";
     updateLevelProgress();
+    mascotReact("confused");
     fb.textContent = `答錯，正確答案是 ${q.answer}，請重新輸入`;
     clearInputSoon(box);
   }
@@ -268,15 +299,16 @@ function submitReview() {
     lvl.review.pos++;
     if (lvl.review.pos >= lvl.review.queue.length) {
       fb.textContent = "🎀 複習完成，繼續闖關！";
-      mascotReact(true);
+      mascotReact("combo", true);
       setTimeout(renderLevelQuestion, 800);
     } else {
       fb.textContent = praise();
-      mascotReact(false);
+      mascotReact("happy", false);
       setTimeout(loadReviewQuestion, 450);
     }
   } else {
     box.classList.add("bad"); fb.className = "feedback bad";
+    mascotReact("confused");
     fb.textContent = `答錯，正確答案是 ${q.answer}，請重新輸入`;
     clearInputSoon(box);
   }
@@ -301,7 +333,7 @@ function finish(completed) {
   show("result");
   $("#result-title").textContent = completed ? "全部過關！ 🎉" : "本次結束";
   $("#score").textContent = completed ? "全破 🏆" : `到第 ${stats.reachedLevel} 關`;
-  $("#mascot-win").innerHTML = completed ? MASCOT_SVG : "";
+  $("#mascot-win").innerHTML = completed ? mascotSvg("win") : "";
   if (completed) confetti();
   $("#score-detail").innerHTML =
     `作答 ${stats.answered} 題　答錯 ${stats.wrong} 題<br>用時 ${formatTime(elapsedSec)}`;
@@ -411,7 +443,7 @@ document.addEventListener("touchend", (e) => {
 
 // 初始化
 buildLevelSelect();
-$("#mascot").innerHTML = MASCOT_SVG;
+$("#mascot").innerHTML = mascotSvg("idle");
 $("#app-version").textContent = `整數加減過關　${VERSION}`;
 
 // Service Worker
