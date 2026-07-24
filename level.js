@@ -1,5 +1,5 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v13";
+const VERSION = "v14";
 
 // 答對稱讚語（隨機）
 const PRAISES = ["✨ 答對！", "🌟 Good！", "💯 太棒了！", "😊 正確！"];
@@ -148,7 +148,12 @@ function start() {
 
   settings = { minA, maxA, minB, maxB };
   lvl = { plan, step: 0, idx: plan[0], streak: 0, phase: "normal", q: null, wrongPool: [], review: null };
-  stats = { startTime: Date.now(), plan: plan.map((i) => i + 1), answered: 0, wrong: 0, wrongList: [], reachedLevel: plan[0] + 1 };
+  stats = {
+    session: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    startTime: Date.now(), plan: plan.map((i) => i + 1),
+    answered: 0, wrong: 0, wrongList: [], reachedLevel: plan[0] + 1, finalized: false,
+  };
+  startRecord();          // 登錄即先記一列「進行中」
 
   showSetupError("");
   show("quiz");
@@ -352,7 +357,7 @@ function finish(completed) {
     });
   }
 
-  sendRecord(completed, elapsedSec);
+  finalize(completed);
 }
 
 function formatTime(sec) {
@@ -375,42 +380,65 @@ function confetti() {
 }
 
 // ---- 回傳到 Google 試算表 ----
-function sendRecord(completed, elapsedSec) {
-  const statusEl = $("#record-status");
-  const payload = {
-    版本: VERSION,
-    時間: new Date().toISOString(),
-    完成: completed ? "全破" : "中途結束",
+function postRecord(payload, beacon) {
+  if (!RECORD_URL) return false;
+  const body = JSON.stringify(payload);
+  if (beacon && navigator.sendBeacon) {
+    return navigator.sendBeacon(RECORD_URL, new Blob([body], { type: "text/plain;charset=utf-8" }));
+  }
+  return fetch(RECORD_URL, {
+    method: "POST", mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body,
+  });
+}
+
+// 登錄即記一列（進行中 + 上線時間）
+function startRecord() {
+  postRecord({
+    action: "start", session: stats.session, 版本: VERSION,
+    上線時間: new Date().toISOString(), 選擇關卡: stats.plan.join(","),
+  }, false);
+}
+
+// 結束時更新同一列；beacon=true 用於關閉分頁的可靠送出
+function finalize(completed, beacon) {
+  if (!stats || stats.finalized) return;
+  stats.finalized = true;
+  const elapsedSec = Math.round((Date.now() - stats.startTime) / 1000);
+  postRecord({
+    action: "finish", session: stats.session, 版本: VERSION,
+    結束時間: new Date().toISOString(),
+    完成: completed ? "全破" : "未通關",
     選擇關卡: stats.plan.join(","),
     到達關卡: stats.reachedLevel,
-    作答數: stats.answered,
-    答錯數: stats.wrong,
-    用時秒: elapsedSec,
-    錯題: stats.wrongList,
-  };
+    作答數: stats.answered, 答錯數: stats.wrong,
+    用時秒: elapsedSec, 錯題: stats.wrongList,
+  }, beacon);
 
-  if (!RECORD_URL) {
-    statusEl.textContent = "（尚未設定回傳網址，紀錄未上傳）";
-    statusEl.className = "record-status muted";
-    return;
+  const statusEl = $("#record-status");
+  if (statusEl) {
+    statusEl.textContent = RECORD_URL ? "紀錄已回傳 ✓" : "（尚未設定回傳網址，紀錄未上傳）";
+    statusEl.className = RECORD_URL ? "record-status ok" : "record-status muted";
   }
-  statusEl.textContent = "紀錄回傳中…";
-  statusEl.className = "record-status muted";
-  fetch(RECORD_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload),
-  })
-    .then(() => { statusEl.textContent = "紀錄已回傳 ✓"; statusEl.className = "record-status ok"; })
-    .catch(() => { statusEl.textContent = "紀錄回傳失敗（可稍後再試）"; statusEl.className = "record-status bad"; });
 }
 
-// ---- 中途離開：有作答就記一筆，再回設定 ----
+// ---- 中途離開 ----
 function quit() {
-  if (stats && stats.answered > 0) finish(false);
-  else show("setup");
+  if (stats && !stats.finalized) {
+    if (stats.answered > 0) { finish(false); return; }   // 有作答：顯示結果並記錄未通關
+    finalize(false);                                      // 完全沒作答：直接記未通關
+  }
+  show("setup");
 }
+
+// 關閉分頁／離開頁面：若還在闖關中且未記錄，用 beacon 補記未通關
+function leaveGuard() {
+  if (stats && !stats.finalized && $("#quiz").classList.contains("active")) {
+    finalize(false, true);
+  }
+}
+window.addEventListener("pagehide", leaveGuard);
 
 // ===== 事件綁定 =====
 $("#start-btn").addEventListener("click", start);

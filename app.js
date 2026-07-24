@@ -1,5 +1,5 @@
 // ===== 整數四則運算練習 PWA =====
-const VERSION = "v13";
+const VERSION = "v14";
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
