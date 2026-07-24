@@ -3,27 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#4f46e5" />
-  <title>整數加減過關</title>
+  <meta name="theme-color" content="#8B7BFF" />
+  <title>綺妍-整數加減過關</title>
 
   <link rel="manifest" href="manifest-level.webmanifest" />
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="過關" />
+  <meta name="apple-mobile-web-app-title" content="綺妍過關" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="cute.css" />
 </head>
 <body>
   <div id="app">
 
     <!-- ===== 設定畫面 ===== -->
     <section id="setup" class="screen active">
-      <h1>整數加減過關</h1>
+      <h1>🎮 綺妍的加減過關</h1>
 
       <div class="card">
-        <h2>選擇要練的關卡</h2>
+        <h2>⭐ 選擇要練的關卡</h2>
         <div id="levels-select" class="levels-select"></div>
         <div class="levels-actions">
           <button type="button" class="mini-btn" id="lvl-all">全選</button>
@@ -32,7 +37,7 @@
       </div>
 
       <div class="card">
-        <h2>第一個數字大小範圍</h2>
+        <h2>🔢 第一個數字大小範圍</h2>
         <div class="range-row">
           <label>最小 <input type="number" id="minA" value="1"></label>
           <label>最大 <input type="number" id="maxA" value="20"></label>
@@ -40,7 +45,7 @@
       </div>
 
       <div class="card">
-        <h2>第二個數字大小範圍</h2>
+        <h2>🔢 第二個數字大小範圍</h2>
         <div class="range-row">
           <label>最小 <input type="number" id="minB" value="1"></label>
           <label>最大 <input type="number" id="maxB" value="20"></label>
@@ -48,7 +53,7 @@
       </div>
 
       <p id="setup-error" class="error"></p>
-      <button id="start-btn" class="primary big">開始過關</button>
+      <button id="start-btn" class="primary big">🚀 開始挑戰</button>
     </section>
 
     <!-- ===== 過關畫面 ===== -->

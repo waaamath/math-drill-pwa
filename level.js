@@ -1,5 +1,5 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v9";
+const VERSION = "v10";
 
 // ★ Apps Script Web App 網址，紀錄會回傳到 Google 試算表 ★
 const RECORD_URL = "https://script.google.com/macros/s/AKfycbwmV0YlYeg6_1yw0EIcQMb4d14sl88qJpkX7l7bxqEXnfGZnzvKtcJtTsxlc5wPbddWtw/exec";
@@ -68,7 +68,7 @@ function buildLevelSelect() {
   for (let i = 0; i < TOTAL_LEVELS; i++) {
     const label = document.createElement("label");
     label.className = "lvl-toggle";
-    label.innerHTML = `<input type="checkbox" value="${i}" checked><span>第 ${i + 1} 關<br>${levelName(i)}</span>`;
+    label.innerHTML = `<input type="checkbox" value="${i}" checked><span>⭐ 第 ${i + 1} 關<br>${levelName(i)}</span>`;
     box.appendChild(label);
   }
 }
@@ -260,8 +260,9 @@ function clearLevel() {
 function finish(completed) {
   const elapsedSec = Math.round((Date.now() - stats.startTime) / 1000);
   show("result");
-  $("#result-title").textContent = completed ? "全部過關！" : "本次結束";
+  $("#result-title").textContent = completed ? "全部過關！ 🎉" : "本次結束";
   $("#score").textContent = completed ? "全破 🏆" : `到第 ${stats.reachedLevel} 關`;
+  if (completed) confetti();
   $("#score-detail").innerHTML =
     `作答 ${stats.answered} 題　答錯 ${stats.wrong} 題<br>用時 ${formatTime(elapsedSec)}`;
 
@@ -285,6 +286,20 @@ function finish(completed) {
 function formatTime(sec) {
   const m = Math.floor(sec / 60), s = sec % 60;
   return m > 0 ? `${m} 分 ${s} 秒` : `${s} 秒`;
+}
+
+// 全破時灑彩帶
+function confetti() {
+  const colors = ["#FFD76A", "#9C8BFF", "#7E6BFF", "#FF9EC4", "#7BE0B0"];
+  for (let i = 0; i < 44; i++) {
+    const p = document.createElement("div");
+    p.className = "confetti-piece";
+    p.style.left = Math.random() * 100 + "vw";
+    p.style.background = colors[i % colors.length];
+    p.style.animationDelay = (Math.random() * 0.4) + "s";
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 2800);
+  }
 }
 
 // ---- 回傳到 Google 試算表 ----

@@ -1,5 +1,5 @@
 // Service Worker — 離線快取
-const CACHE = "math-drill-v9";
+const CACHE = "math-drill-v10";
 const ASSETS = [
   "./",
   "./index.html",
@@ -8,6 +8,7 @@ const ASSETS = [
   "./manifest.webmanifest",
   "./level.html",
   "./level.js",
+  "./cute.css",
   "./manifest-level.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",

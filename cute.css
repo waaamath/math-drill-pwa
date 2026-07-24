@@ -1,0 +1,129 @@
+/* ===== 綺妍版：馬卡龍／奶油紫手帳風（只套用在過關頁）===== */
+:root {
+  --bg: #F8F6FF;
+  --card: #FFFFFF;
+  --card2: #F0ECFF;
+  --accent: #8B7BFF;
+  --accent2: #7E6BFF;
+  --text: #4D3E85;      /* 標題／重點字 */
+  --muted: #8B84A8;     /* 次要字 */
+  --ok: #3FBE7A;
+  --bad: #F5738C;
+  --gold: #FFD76A;      /* 選取強調 */
+  --radius: 20px;
+}
+
+html, body {
+  background: var(--bg);
+  color: #666666;
+  font-family: "Noto Sans TC", -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-weight: 500;
+}
+
+h1 { color: var(--text); font-weight: 700; }
+h2 { color: var(--accent2); font-weight: 700; }
+
+/* 卡片：白底、圓角 20、柔和陰影 */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(139, 123, 255, .15);
+}
+
+/* 主按鈕：漸層、圓角 18、hover 變亮、按下微縮 */
+.primary {
+  background: linear-gradient(135deg, #9C8BFF, #7E6BFF);
+  border-radius: 18px;
+  box-shadow: 0 6px 16px rgba(126, 107, 255, .35);
+  transition: transform .1s, filter .15s;
+}
+.primary:hover { filter: brightness(1.08); }
+.primary:active {
+  background: linear-gradient(135deg, #9C8BFF, #7E6BFF);
+  transform: scale(.97);
+}
+
+/* 次要／幽靈按鈕 */
+.ghost { color: #B0A8CE; }
+.ghost.big { border: 2px solid #E4DCFF; border-radius: 16px; }
+.mini-btn {
+  background: #EFEBFF; color: var(--accent2); font-weight: 700; border-radius: 12px;
+  transition: transform .1s;
+}
+.mini-btn:active { transform: scale(.96); }
+
+/* 輸入框：淺紫底、Focus 紫框 */
+.range-row input {
+  background: var(--card2); color: var(--text); border: 2px solid transparent;
+  transition: border-color .15s;
+}
+.range-row input:focus { outline: none; border-color: var(--accent); }
+
+/* 關卡選擇：黃色外框＋淡淡發光 */
+.lvl-toggle span {
+  background: var(--card2); color: #6E639E; border: 2px solid transparent;
+  border-radius: 14px; font-weight: 700;
+}
+.lvl-toggle input:checked + span {
+  background: #FFF7DE; color: var(--text); border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(255, 215, 106, .4), 0 6px 14px rgba(255, 215, 106, .35);
+}
+
+/* 進度條 */
+.progress-wrap { background: #EAE4FF; }
+#progress-bar { background: linear-gradient(90deg, #9C8BFF, #7E6BFF); }
+#progress-text { color: var(--muted); }
+
+/* 關卡橫幅 */
+.level-banner {
+  background: #FFFFFF; border: 2px solid var(--gold);
+  border-radius: 18px; color: var(--text);
+  box-shadow: 0 4px 14px rgba(139, 123, 255, .15);
+}
+.level-banner .sub { color: var(--muted); }
+
+/* 題目與答案框 */
+.question { color: var(--text); }
+.answer-box {
+  background: #FFFFFF; border: 3px solid #E4DCFF; color: var(--text);
+  box-shadow: 0 6px 18px rgba(139, 123, 255, .15);
+}
+.answer-box.ok { border-color: var(--ok); animation: pop .4s ease; }
+.answer-box.bad { border-color: var(--bad); animation: shake .4s ease; }
+
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+/* 數字鍵盤 */
+.key {
+  background: #F3EFFF; color: var(--text); border-radius: 16px; font-weight: 700;
+  box-shadow: 0 3px 8px rgba(139, 123, 255, .15);
+  transition: transform .08s;
+}
+.key:active { transform: scale(.95); background: #E7E0FF; }
+.key.sign, .key.back { background: #E7E0FF; }
+
+/* 錯題複習面板 */
+.review-panel { background: #FFF3F6; border: 2px solid #F7A8BE; }
+.review-title { color: #E8698A; }
+.rv-item { background: #FBEFF3; color: #C084A0; }
+.rv-item.rv-current { color: var(--text); border-color: var(--accent2); }
+.rv-item.rv-done { color: var(--ok); }
+
+/* 結果頁 */
+.score { color: var(--accent2); }
+.record-status.ok { color: var(--ok); }
+.record-status.bad { color: var(--bad); }
+.wrong-item { box-shadow: 0 3px 10px rgba(139, 123, 255, .1); }
+
+.app-version { color: #B7AFD4; }
+
+/* Confetti（全破時） */
+.confetti-piece {
+  position: fixed; top: -20px; width: 10px; height: 14px; border-radius: 2px;
+  z-index: 999; pointer-events: none;
+  animation: confetti-fall 2.2s linear forwards;
+}
+@keyframes confetti-fall {
+  to { top: 105vh; transform: rotate(720deg); }
+}
