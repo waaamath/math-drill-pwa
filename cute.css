@@ -58,11 +58,12 @@ h2 { color: var(--accent2); font-weight: 700; }
 
 /* 關卡選擇：未選白底細框；選取黃框＋淡發光、加大 */
 .levels-select { gap: 8px; }
+.lvl-toggle.full { grid-column: 1 / -1; }        /* 第 9 關整排 */
 .lvl-toggle span {
   background: #FFFFFF; color: #6E639E; border: 1px solid var(--line);
-  border-radius: 14px; font-weight: 700; font-size: 14px; line-height: 1.35;
-  min-height: 52px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; padding: 6px 4px;
+  border-radius: 14px; font-weight: 700; font-size: 14px; line-height: 1.25;
+  min-height: 42px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 5px 4px;
   box-shadow: 0 3px 10px rgba(139, 123, 255, .08);
   transition: transform .1s;
 }
@@ -71,6 +72,18 @@ h2 { color: var(--accent2); font-weight: 700; }
   box-shadow: 0 0 0 3px rgba(255, 200, 61, .35), 0 6px 16px rgba(255, 200, 61, .3);
 }
 .lvl-toggle input:active + span { transform: scale(.97); }
+
+/* 第 9 關：自選混合題型選擇器 */
+.mix-wrap { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.mix-label { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 6px; }
+.mix-select { display: flex; flex-wrap: wrap; gap: 6px; }
+.mix-toggle { position: relative; }
+.mix-toggle input { position: absolute; opacity: 0; }
+.mix-toggle span {
+  display: block; padding: 6px 10px; font-size: 13px; font-weight: 700;
+  background: #FFFFFF; border: 1px solid var(--line); border-radius: 10px; color: #6E639E;
+}
+.mix-toggle input:checked + span { background: #FFF9EA; border-color: var(--gold); color: var(--text); }
 
 /* 進度／狀態列：字大一點好讀 */
 .progress-wrap { background: #EAE4FF; height: 10px; }

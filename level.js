@@ -1,5 +1,5 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v16";
+const VERSION = "v17";
 
 // 答對稱讚語（隨機）
 const PRAISES = ["✨ 答對！", "🌟 Good！", "💯 太棒了！", "😊 正確！"];
@@ -79,16 +79,23 @@ const LEVELS = [
 ];
 const GOAL = 30;                 // 每關需連續答對的題數
 const REVIEW_TRIGGER = 5;        // 累積錯幾題就進錯題複習
-const TOTAL_LEVELS = LEVELS.length + 1;
+// 第 8 關＝前 7 關全混合；第 9 關＝自選題型混合
+const TOTAL_LEVELS = LEVELS.length + 2;
 
 function levelName(idx) {
-  return idx < LEVELS.length ? LEVELS[idx].name : "混合（前 7 關綜合）";
+  if (idx < LEVELS.length) return LEVELS[idx].name;
+  if (idx === LEVELS.length) return "混合（前 7 關綜合）";
+  return "自選混合";
+}
+// 第 9 關要混的題型組合（依 lvl.customMix；空則全部）
+function mixPool() {
+  return (lvl.customMix && lvl.customMix.length) ? lvl.customMix : LEVELS.map((_, i) => i);
 }
 
 // ---- 狀態 ----
 let settings = { minA: 1, maxA: 20, minB: 1, maxB: 20 };
 let quiz = { input: "" };
-let lvl = { plan: [], step: 0, idx: 0, streak: 0, phase: "normal", q: null, wrongPool: [], review: null };
+let lvl = { plan: [], step: 0, idx: 0, streak: 0, phase: "normal", q: null, wrongPool: [], review: null, customMix: [] };
 // 本次使用的統計紀錄
 let stats = null;
 
@@ -111,7 +118,10 @@ function magFrom(min, max) {
   return randInt(1, Math.max(1, hi));
 }
 function pickCombo() {
-  return lvl.idx < LEVELS.length ? LEVELS[lvl.idx] : LEVELS[randInt(0, LEVELS.length - 1)];
+  if (lvl.idx < LEVELS.length) return LEVELS[lvl.idx];                            // 1-7
+  if (lvl.idx === LEVELS.length) return LEVELS[randInt(0, LEVELS.length - 1)];    // 8：全混合
+  const pool = mixPool();                                                          // 9：自選混合
+  return LEVELS[pool[randInt(0, pool.length - 1)]];
 }
 function makeLevelQuestion() {
   const L = pickCombo();
@@ -121,16 +131,35 @@ function makeLevelQuestion() {
   return { a, b, op: L.op, answer, text: `${a} ${L.op} ${fmt(b)} =`, levelNo: lvl.idx + 1 };
 }
 
-// ---- 建立關卡勾選清單 ----
+// ---- 建立關卡勾選清單（1-8 雙排、第 9 關整排在最下）----
 function buildLevelSelect() {
   const box = $("#levels-select");
   box.innerHTML = "";
   for (let i = 0; i < TOTAL_LEVELS; i++) {
     const label = document.createElement("label");
-    label.className = "lvl-toggle";
-    label.innerHTML = `<input type="checkbox" value="${i}" checked><span>⭐ 第 ${i + 1} 關<br>${levelName(i)}</span>`;
+    label.className = "lvl-toggle" + (i === TOTAL_LEVELS - 1 ? " full" : "");
+    label.innerHTML = `<input type="checkbox" value="${i}" checked><span>⭐ 第 ${i + 1} 關　${levelName(i)}</span>`;
     box.appendChild(label);
   }
+  box.addEventListener("change", updateMixVisibility);
+}
+
+// ---- 第 9 關「混哪些題型」勾選（7 種）----
+function buildMixSelect() {
+  const box = $("#mix-select");
+  box.innerHTML = "";
+  for (let i = 0; i < LEVELS.length; i++) {
+    const label = document.createElement("label");
+    label.className = "mix-toggle";
+    label.innerHTML = `<input type="checkbox" value="${i}" checked><span>${LEVELS[i].name}</span>`;
+    box.appendChild(label);
+  }
+}
+
+// 只有勾選第 9 關時才顯示混合題型選擇器
+function updateMixVisibility() {
+  const c = $(`#levels-select input[value="${TOTAL_LEVELS - 1}"]`);
+  $("#mix-wrap").hidden = !(c && c.checked);
 }
 
 // ---- 開始 ----
@@ -146,8 +175,12 @@ function start() {
     .map((c) => parseInt(c.value, 10)).sort((a, b) => a - b);
   if (plan.length === 0) return showSetupError("請至少勾選一關");
 
+  const customMix = [...$$("#mix-select input:checked")].map((c) => parseInt(c.value, 10));
+  if (plan.includes(TOTAL_LEVELS - 1) && customMix.length === 0)
+    return showSetupError("第 9 關請至少勾選一種題型");
+
   settings = { minA, maxA, minB, maxB };
-  lvl = { plan, step: 0, idx: plan[0], streak: 0, phase: "normal", q: null, wrongPool: [], review: null };
+  lvl = { plan, step: 0, idx: plan[0], streak: 0, phase: "normal", q: null, wrongPool: [], review: null, customMix };
   stats = {
     session: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
     startTime: Date.now(), plan: plan.map((i) => i + 1),
@@ -166,8 +199,12 @@ function renderLevelQuestion() {
   lvl.q = makeLevelQuestion();
   quiz.input = "";
   $("#review-panel").hidden = true;
+  let bannerName = levelName(lvl.idx);
+  if (lvl.idx === LEVELS.length + 1) {
+    bannerName = `自選混合（${mixPool().map((i) => LEVELS[i].name.replace(/ /g, "")).join("・")}）`;
+  }
   $("#level-banner").innerHTML =
-    `第 ${lvl.idx + 1} 關　${levelName(lvl.idx)}<span class="sub">進度 ${lvl.step + 1} / ${lvl.plan.length} 關</span>`;
+    `第 ${lvl.idx + 1} 關　${bannerName}<span class="sub">進度 ${lvl.step + 1} / ${lvl.plan.length} 關</span>`;
   $("#question").textContent = lvl.q.text;
   updateAnswerBox();
   $("#feedback").textContent = "";
@@ -446,8 +483,8 @@ $("#quit-btn").addEventListener("click", quit);
 $("#submit-btn").addEventListener("click", onSubmit);
 $("#again-btn").addEventListener("click", start);
 $("#home-btn").addEventListener("click", () => show("setup"));
-$("#lvl-all").addEventListener("click", () => $$("#levels-select input").forEach((c) => (c.checked = true)));
-$("#lvl-none").addEventListener("click", () => $$("#levels-select input").forEach((c) => (c.checked = false)));
+$("#lvl-all").addEventListener("click", () => { $$("#levels-select input").forEach((c) => (c.checked = true)); updateMixVisibility(); });
+$("#lvl-none").addEventListener("click", () => { $$("#levels-select input").forEach((c) => (c.checked = false)); updateMixVisibility(); });
 $$(".key").forEach((k) => k.addEventListener("click", () => pressKey(k.dataset.key)));
 
 document.addEventListener("keydown", (e) => {
@@ -478,6 +515,8 @@ document.addEventListener("touchend", (e) => {
 
 // 初始化
 buildLevelSelect();
+buildMixSelect();
+updateMixVisibility();
 $("#mascot").innerHTML = mascotSvg("idle");
 $("#app-version").textContent = `整數加減過關　${VERSION}`;
 
