@@ -1,5 +1,5 @@
 // Service Worker — 離線快取
-const CACHE = "math-drill-v18";
+const CACHE = "math-drill-v19";
 const ASSETS = [
   "./",
   "./index.html",
@@ -31,10 +31,12 @@ self.addEventListener("activate", (e) => {
 });
 
 // 網路優先：連得上網就拿最新版並更新快取；離線時才用快取。
+// 同源檔案用 no-store 略過瀏覽器 HTTP 快取，避免更新後拿到 10 分鐘舊檔。
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+  const sameOrigin = new URL(e.request.url).origin === self.location.origin;
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, sameOrigin ? { cache: "no-store" } : undefined)
       .then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
