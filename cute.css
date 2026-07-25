@@ -73,17 +73,8 @@ h2 { color: var(--accent2); font-weight: 700; }
 }
 .lvl-toggle input:active + span { transform: scale(.97); }
 
-/* 第 9 關：自選混合題型選擇器 */
-.mix-wrap { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
-.mix-label { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 6px; }
-.mix-select { display: flex; flex-wrap: wrap; gap: 6px; }
-.mix-toggle { position: relative; }
-.mix-toggle input { position: absolute; opacity: 0; }
-.mix-toggle span {
-  display: block; padding: 6px 10px; font-size: 13px; font-weight: 700;
-  background: #FFFFFF; border: 1px solid var(--line); border-radius: 10px; color: #6E639E;
-}
-.mix-toggle input:checked + span { background: #FFF9EA; border-color: var(--gold); color: var(--text); }
+/* 第 9 關說明 */
+.mix-note { margin: 6px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
 
 /* 進度／狀態列：字大一點好讀 */
 .progress-wrap { background: #EAE4FF; height: 10px; }

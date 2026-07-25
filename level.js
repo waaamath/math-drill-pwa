@@ -1,5 +1,5 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v17";
+const VERSION = "v18";
 
 // 答對稱讚語（隨機）
 const PRAISES = ["✨ 答對！", "🌟 Good！", "💯 太棒了！", "😊 正確！"];
@@ -141,25 +141,6 @@ function buildLevelSelect() {
     label.innerHTML = `<input type="checkbox" value="${i}" checked><span>⭐ 第 ${i + 1} 關　${levelName(i)}</span>`;
     box.appendChild(label);
   }
-  box.addEventListener("change", updateMixVisibility);
-}
-
-// ---- 第 9 關「混哪些題型」勾選（7 種）----
-function buildMixSelect() {
-  const box = $("#mix-select");
-  box.innerHTML = "";
-  for (let i = 0; i < LEVELS.length; i++) {
-    const label = document.createElement("label");
-    label.className = "mix-toggle";
-    label.innerHTML = `<input type="checkbox" value="${i}" checked><span>${LEVELS[i].name}</span>`;
-    box.appendChild(label);
-  }
-}
-
-// 只有勾選第 9 關時才顯示混合題型選擇器
-function updateMixVisibility() {
-  const c = $(`#levels-select input[value="${TOTAL_LEVELS - 1}"]`);
-  $("#mix-wrap").hidden = !(c && c.checked);
 }
 
 // ---- 開始 ----
@@ -175,9 +156,8 @@ function start() {
     .map((c) => parseInt(c.value, 10)).sort((a, b) => a - b);
   if (plan.length === 0) return showSetupError("請至少勾選一關");
 
-  const customMix = [...$$("#mix-select input:checked")].map((c) => parseInt(c.value, 10));
-  if (plan.includes(TOTAL_LEVELS - 1) && customMix.length === 0)
-    return showSetupError("第 9 關請至少勾選一種題型");
+  // 第 9 關的混合來源＝勾選的 1～7 關（沒勾任何則預設全部 7 種）
+  const customMix = plan.filter((i) => i < LEVELS.length);
 
   settings = { minA, maxA, minB, maxB };
   lvl = { plan, step: 0, idx: plan[0], streak: 0, phase: "normal", q: null, wrongPool: [], review: null, customMix };
@@ -483,8 +463,8 @@ $("#quit-btn").addEventListener("click", quit);
 $("#submit-btn").addEventListener("click", onSubmit);
 $("#again-btn").addEventListener("click", start);
 $("#home-btn").addEventListener("click", () => show("setup"));
-$("#lvl-all").addEventListener("click", () => { $$("#levels-select input").forEach((c) => (c.checked = true)); updateMixVisibility(); });
-$("#lvl-none").addEventListener("click", () => { $$("#levels-select input").forEach((c) => (c.checked = false)); updateMixVisibility(); });
+$("#lvl-all").addEventListener("click", () => $$("#levels-select input").forEach((c) => (c.checked = true)));
+$("#lvl-none").addEventListener("click", () => $$("#levels-select input").forEach((c) => (c.checked = false)));
 $$(".key").forEach((k) => k.addEventListener("click", () => pressKey(k.dataset.key)));
 
 document.addEventListener("keydown", (e) => {
@@ -515,8 +495,6 @@ document.addEventListener("touchend", (e) => {
 
 // 初始化
 buildLevelSelect();
-buildMixSelect();
-updateMixVisibility();
 $("#mascot").innerHTML = mascotSvg("idle");
 $("#app-version").textContent = `整數加減過關　${VERSION}`;
 
