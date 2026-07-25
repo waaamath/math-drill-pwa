@@ -1,5 +1,5 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v19";
+const VERSION = "v20";
 
 // 答對稱讚語（隨機）
 const PRAISES = ["✨ 答對！", "🌟 Good！", "💯 太棒了！", "😊 正確！"];
@@ -152,18 +152,29 @@ function start() {
   if ([minA, maxA, minB, maxB].some((n) => Number.isNaN(n))) return showSetupError("範圍必須是數字");
   if (minA > maxA || minB > maxB) return showSetupError("最小值不能大於最大值");
 
-  const plan = [...$$("#levels-select input:checked")]
+  const checked = [...$$("#levels-select input:checked")]
     .map((c) => parseInt(c.value, 10)).sort((a, b) => a - b);
-  if (plan.length === 0) return showSetupError("請至少勾選一關");
+  if (checked.length === 0) return showSetupError("請至少勾選一關");
 
-  // 第 9 關的混合來源＝勾選的 1～7 關（沒勾任何則預設全部 7 種）
-  const customMix = plan.filter((i) => i < LEVELS.length);
+  // 勾了第 9 關 → 只玩第 9 關，題目混合另外勾的 1~7 關（沒勾則全部 7 種）；否則照勾選依序玩
+  const level9 = TOTAL_LEVELS - 1;
+  let plan, customMix, planLabel;
+  if (checked.includes(level9)) {
+    customMix = checked.filter((i) => i < LEVELS.length);
+    plan = [level9];
+    const src = customMix.length ? customMix : LEVELS.map((_, i) => i);
+    planLabel = `第9關混合(${src.map((i) => i + 1).join("/")})`;
+  } else {
+    plan = checked;
+    customMix = [];
+    planLabel = plan.map((i) => i + 1).join(",");
+  }
 
   settings = { minA, maxA, minB, maxB };
   lvl = { plan, step: 0, idx: plan[0], streak: 0, phase: "normal", q: null, wrongPool: [], review: null, customMix };
   stats = {
     session: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-    startTime: Date.now(), plan: plan.map((i) => i + 1),
+    startTime: Date.now(), planLabel,
     answered: 0, wrong: 0, wrongList: [], reachedLevel: plan[0] + 1, finalized: false,
   };
   startRecord();          // 登錄即先記一列「進行中」
@@ -414,7 +425,7 @@ function postRecord(payload, beacon) {
 function startRecord() {
   postRecord({
     action: "start", session: stats.session, 版本: VERSION,
-    上線時間: new Date().toISOString(), 選擇關卡: stats.plan.join(","),
+    上線時間: new Date().toISOString(), 選擇關卡: stats.planLabel,
   }, false);
 }
 
@@ -427,7 +438,7 @@ function finalize(completed, beacon) {
     action: "finish", session: stats.session, 版本: VERSION,
     結束時間: new Date().toISOString(),
     完成: completed ? "全破" : "未通關",
-    選擇關卡: stats.plan.join(","),
+    選擇關卡: stats.planLabel,
     到達關卡: stats.reachedLevel,
     作答數: stats.answered, 答錯數: stats.wrong,
     用時秒: elapsedSec, 錯題: stats.wrongList,
