@@ -1,5 +1,5 @@
 const GOAL = 20;
-const RECORD_URL = 'https://script.google.com/macros/s/AKfycbyE4A1ZNY2T4ixLMwfHOBorCdB7VXSUZ5QEMg_GmbftgSBljDnmgCXhzhJmtoIPbcutow/exec';
+const RECORD_URL = 'https://script.google.com/macros/s/AKfycbwgpik6huAWTS-mioVkM2bFGTK-KIkGZDQmZ8j44koaSUxljfu5GRZaaN_GhV_Puphyvw/exec';
 const $ = (selector) => document.querySelector(selector);
 
 // 題目範圍依照講義「繞 x 軸」與「繞 y 軸」的 25 個公式。
