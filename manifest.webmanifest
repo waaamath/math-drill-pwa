@@ -1,16 +1,1 @@
-{
-  "name": "整數四則運算練習",
-  "short_name": "四則運算",
-  "description": "兩個整數的加減乘除練習，支援數字鍵盤與正負鍵輸入。",
-  "start_url": "./index.html",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0f172a",
-  "theme_color": "#4f46e5",
-  "icons": [
-    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ]
-}
+{"name":"參考角練習｜三角函數","short_name":"參考角練習","description":"高中三角函數參考角連勝闖關練習。","start_url":"./index.html","scope":"./","display":"standalone","orientation":"portrait","background_color":"#f7f4ee","theme_color":"#102a43","icons":[{"src":"icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},{"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
