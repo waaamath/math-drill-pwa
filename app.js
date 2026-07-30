@@ -1,4 +1,5 @@
 const GOAL = 20;
+const DEFAULT_RECORD_URL = 'https://script.google.com/macros/s/AKfycbyE4A1ZNY2T4ixLMwfHOBorCdB7VXSUZ5QEMg_GmbftgSBljDnmgCXhzhJmtoIPbcutow/exec';
 const $ = (selector) => document.querySelector(selector);
 let state = { angle: 0, reference: 0, streak: 0, mistakes: 0, startedAt: 0, history: [], locked: false };
 
@@ -33,7 +34,7 @@ function pressKey(key) {
 function resultRecord() { const seconds = Math.round((Date.now() - state.startedAt) / 1000); return { completedAt: new Date().toLocaleString('zh-TW'), seconds, mistakes: state.mistakes, maxStreak: GOAL, status: '通關' }; }
 function finishGame() { const record = resultRecord(); $('#elapsed-value').textContent = timeText(record.seconds); $('#mistake-value').textContent = record.mistakes; show('result-screen'); uploadRecord(record); }
 async function uploadRecord(record) {
-  const url = localStorage.getItem('reference-angle-record-url'); const status = $('#upload-status');
+  const url = localStorage.getItem('reference-angle-record-url') || DEFAULT_RECORD_URL; const status = $('#upload-status');
   if (!url) { status.textContent = '尚未設定試算表連結；你可以下載 CSV 留存紀錄。'; return; }
   status.textContent = '正在上傳到試算表…';
   try { await fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(record) }); status.textContent = '已送出試算表上傳請求。'; }
@@ -44,6 +45,6 @@ $('#start-button').addEventListener('click', startGame); $('#submit-button').add
 document.querySelectorAll('.keypad button').forEach(button => button.addEventListener('click', () => pressKey(button.dataset.key)));
 document.addEventListener('keydown', event => { if (!$('#quiz-screen').classList.contains('active')) return; if (/^[0-9]$/.test(event.key)) pressKey(event.key); else if (event.key === 'Backspace') pressKey('back'); else if (event.key === 'Enter') submitAnswer(); });
 $('#exit-button').addEventListener('click', () => show('home-screen')); $('#again-button').addEventListener('click', startGame); $('#home-button').addEventListener('click', () => show('home-screen')); $('#download-button').addEventListener('click', downloadCsv);
-$('#settings-button').addEventListener('click', () => { $('#record-url').value = localStorage.getItem('reference-angle-record-url') || ''; $('#settings-message').textContent = ''; show('settings-screen'); }); $('#settings-back').addEventListener('click', () => show('home-screen'));
+$('#settings-button').addEventListener('click', () => { $('#record-url').value = localStorage.getItem('reference-angle-record-url') || DEFAULT_RECORD_URL; $('#settings-message').textContent = ''; show('settings-screen'); }); $('#settings-back').addEventListener('click', () => show('home-screen'));
 $('#save-settings').addEventListener('click', () => { const url = $('#record-url').value.trim(); if (url && !/^https:\/\//.test(url)) { $('#settings-message').textContent = '請貼上以 https:// 開頭的網址。'; return; } localStorage.setItem('reference-angle-record-url', url); $('#settings-message').textContent = url ? '已儲存。完成闖關時會自動上傳。' : '已清除網址。'; });
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
