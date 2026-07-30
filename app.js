@@ -5,12 +5,11 @@ let state = { angle: 0, reference: 0, streak: 0, mistakes: 0, startedAt: 0, hist
 function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(`#${id}`).classList.add('active'); }
 function pad(n) { return String(n).padStart(2, '0'); }
 function timeText(seconds) { return `${pad(Math.floor(seconds / 60))}:${pad(seconds % 60)}`; }
-function quadrant(angle) { return angle < 90 ? '第一象限' : angle < 180 ? '第二象限' : angle < 270 ? '第三象限' : '第四象限'; }
 function referenceAngle(angle) { return angle < 90 ? angle : angle < 180 ? 180 - angle : angle < 270 ? angle - 180 : 360 - angle; }
 function randomAngle() { let n; do { n = Math.floor(Math.random() * 361); } while (n % 90 === 0); return n; }
 function renderQuestion() {
   state.angle = randomAngle(); state.reference = referenceAngle(state.angle); state.locked = false;
-  $('#angle-value').textContent = state.angle; $('#quadrant-hint').textContent = quadrant(state.angle);
+  $('#angle-value').textContent = state.angle;
   $('#answer-input').value = ''; $('#answer-input').disabled = false; $('#feedback').textContent = ''; $('#feedback').className = 'feedback';
   $('#streak-value').innerHTML = `${state.streak} <small>/ ${GOAL}</small>`; $('#progress-fill').style.width = `${state.streak / GOAL * 100}%`;
   setTimeout(() => $('#answer-input').focus(), 50);
