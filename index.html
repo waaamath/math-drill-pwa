@@ -22,11 +22,9 @@
       </div>
       <article class="panel rules">
         <h2>闖關規則</h2>
-        <div class="rule-grid"><div><b>20</b><span>連續答對</span></div><div><b>0°–360°</b><span>整數角隨機出題</span></div><div><b>×</b><span>不出軸上角</span></div></div>
-        <p class="muted">答錯會重新累積連勝；每一題都可以看象限提示。</p>
+        <div class="rule-grid two-columns"><div><b>20</b><span>連續答對</span></div><div><b>0°–360°</b><span>整數角隨機出題</span></div></div>
       </article>
       <button id="start-button" class="primary-button">開始闖關 <span>→</span></button>
-      <button id="settings-button" class="text-button">紀錄與試算表設定</button>
     </section>
 
     <section id="quiz-screen" class="screen">
@@ -60,12 +58,6 @@
       <button id="home-button" class="text-button">回到首頁</button>
     </section>
 
-    <section id="settings-screen" class="screen">
-      <button id="settings-back" class="back-button">← 返回</button>
-      <h1>紀錄與試算表</h1>
-      <article class="panel settings-panel"><h2>Google 試算表上傳</h2><p>將 Google Apps Script 部署成網頁應用程式後，把網址貼在這裡。完成闖關時會自動新增一筆紀錄。</p><label for="record-url">Web App 網址</label><input id="record-url" type="url" placeholder="https://script.google.com/macros/s/.../exec"><button id="save-settings" class="secondary-button">儲存設定</button><p id="settings-message" class="muted"></p></article>
-      <article class="panel guide"><h2>欄位內容</h2><p>完成時間、作答秒數、答錯次數、最高連勝、通關狀態。</p><p class="muted">未設定網址也沒關係，仍可在完成頁下載 CSV。</p></article>
-    </section>
   </main>
   <script src="app.js"></script>
 </body>
