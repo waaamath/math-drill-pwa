@@ -1,1 +1,64 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#102a43"><title>廣義三角比的角度轉換</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon.svg"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css"><link rel="stylesheet" href="style.css"></head><body><main class="app-shell"><header class="site-header"><span class="eyebrow">TRIGONOMETRY DRILL</span><span class="unit">三角比角度轉換</span></header><section id="home-screen" class="screen active"><div class="hero"><p class="chapter">CHAPTER 03</p><h1>廣義三角比的<br>角度轉換</h1><p>熟練 <strong>sin、cos、tan</strong> 的誘導公式，快速找出等值的三角比。</p></div><article class="panel rules"><h2>練習規則</h2><div class="rule-grid"><div><b>20</b><span>連續答對題數</span></div><div><b>3</b><span>三角函數</span></div><div><b>6</b><span>角度型式</span></div></div></article><button id="start-button" class="primary-button">開始練習 <span>→</span></button></section><section id="quiz-screen" class="screen"><div class="quiz-header"><button id="exit-button" class="icon-button" aria-label="離開">×</button><div class="streak-box"><span>連續答對</span><b id="streak-value">0 <small>/ 20</small></b></div></div><div class="progress-track"><div id="progress-fill"></div></div><div class="question-card"><p class="question-label">請選出正確的角度轉換</p><div id="question-expression" class="expression"></div><p id="feedback" class="feedback" aria-live="polite"></p><div id="choices" class="choices"></div></div><div class="reference-note"><span class="note-mark">i</span><span>提示：利用奇偶性、週期性與餘角關係，判斷函數名稱和正負號。</span></div></section><section id="result-screen" class="screen result-screen"><div class="completion-mark">✓</div><p class="chapter">MISSION COMPLETE</p><h1>練習完成！</h1><p class="result-summary">已連續答對 20 題廣義三角比角度轉換。</p><article class="panel result-panel"><div><span>花費時間</span><b id="elapsed-value">--:--</b></div><div><span>答錯次數</span><b id="mistake-value">0</b></div><div><span>完成題數</span><b>20</b></div></article><button id="download-button" class="secondary-button">下載本次紀錄 CSV</button><button id="again-button" class="primary-button">再練一次</button><button id="home-button" class="text-button">回到首頁</button></section></main><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script><script defer src="app.js"></script></body></html>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102a43">
+  <title>參考角練習｜三角函數</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="site-header"><span class="eyebrow">TRIGONOMETRY DRILL</span><span class="unit">高中數學・三角函數</span></header>
+
+    <section id="home-screen" class="screen active">
+      <div class="hero">
+        <p class="chapter">CHAPTER 03</p>
+        <h1>參考角練習</h1>
+        <p>找出終邊與 <strong>x 軸</strong> 所夾的最小正角。</p>
+      </div>
+      <article class="panel rules">
+        <h2>闖關規則</h2>
+        <div class="rule-grid two-columns"><div><b>20</b><span>連續答對</span></div><div><b>0°–360°</b><span>整數角隨機出題</span></div></div>
+      </article>
+      <button id="start-button" class="primary-button">開始闖關 <span>→</span></button>
+    </section>
+
+    <section id="quiz-screen" class="screen">
+      <div class="quiz-header"><button id="exit-button" class="icon-button" aria-label="離開">×</button><div class="streak-box"><span>連續答對</span><b id="streak-value">0 <small>/ 20</small></b></div></div>
+      <div class="progress-track"><div id="progress-fill"></div></div>
+      <div class="question-card">
+        <p class="question-label">求下列角的參考角</p>
+        <div class="angle-line"><span id="angle-value">136</span><sup>°</sup></div>
+        <div class="answer-row"><input id="answer-input" inputmode="numeric" autocomplete="off" aria-label="參考角答案" readonly tabindex="-1"><span>°</span></div>
+        <p id="feedback" class="feedback" aria-live="polite"></p>
+      </div>
+      <div class="reference-note"><span class="note-mark">i</span><span>參考角範圍為 <b>0° &lt; α &lt; 90°</b></span></div>
+      <div class="keypad" aria-label="數字鍵盤">
+        <button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button>
+        <button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button>
+        <button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button>
+        <button class="key-clear" data-key="clear">清除</button><button data-key="0">0</button><button class="key-delete" data-key="back" aria-label="刪除一位數字">⌫</button>
+      </div>
+      <button id="submit-button" class="primary-button">送出答案</button>
+    </section>
+
+    <section id="result-screen" class="screen result-screen">
+      <div class="completion-mark">✓</div>
+      <p class="chapter">MISSION COMPLETE</p>
+      <h1>闖關成功</h1>
+      <p class="result-summary">你已連續答對 20 題參考角題目。</p>
+      <article class="panel result-panel"><div><span>作答時間</span><b id="elapsed-value">--:--</b></div><div><span>答錯次數</span><b id="mistake-value">0</b></div><div><span>最高連勝</span><b>20</b></div></article>
+      <p id="upload-status" class="muted upload-status"></p>
+      <button id="download-button" class="secondary-button">下載本次紀錄 CSV</button>
+      <button id="again-button" class="primary-button">再挑戰一次</button>
+      <button id="home-button" class="text-button">回到首頁</button>
+    </section>
+
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
