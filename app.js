@@ -1,4 +1,5 @@
 const GOAL = 20;
+const RECORD_URL = 'https://script.google.com/macros/s/AKfycbyE4A1ZNY2T4ixLMwfHOBorCdB7VXSUZ5QEMg_GmbftgSBljDnmgCXhzhJmtoIPbcutow/exec';
 const $ = (selector) => document.querySelector(selector);
 
 // 題目範圍依照講義「繞 x 軸」與「繞 y 軸」的 25 個公式。
@@ -135,22 +136,57 @@ function answerQuestion(answer, selectedButton) {
   }
 }
 
-function finishGame() {
+function resultRecord() {
   const seconds = Math.round((Date.now() - state.startedAt) / 1000);
+  return {
+    exercise: '廣義三角比的角度轉換',
+    completedAt: new Date().toLocaleString('zh-TW'),
+    seconds,
+    mistakes: state.mistakes,
+    maxStreak: GOAL,
+    status: '通關',
+  };
+}
+
+function finishGame() {
+  const record = resultRecord();
+  const seconds = record.seconds;
   const pad = (number) => String(number).padStart(2, '0');
   $('#elapsed-value').textContent = `${pad(Math.floor(seconds / 60))}:${pad(seconds % 60)}`;
-  $('#mistake-value').textContent = state.mistakes;
+  $('#mistake-value').textContent = record.mistakes;
   show('result-screen');
+  uploadRecord(record);
+}
+
+async function uploadRecord(record) {
+  const status = $('#upload-status');
+  status.textContent = '正在上傳到 Google 試算表…';
+  try {
+    await fetch(RECORD_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(record),
+    });
+    status.textContent = '已送出試算表紀錄。';
+    status.className = 'upload-status upload-ok';
+  } catch {
+    status.textContent = '試算表上傳失敗，仍可下載 CSV 保存。';
+    status.className = 'upload-status upload-error';
+  }
 }
 
 function downloadCsv() {
+  const record = resultRecord();
   const rows = [
-    ['完成時間', '花費秒數', '答錯次數', '完成題數'],
+    ['練習項目', '完成時間', '花費秒數', '答錯次數', '完成題數', '狀態'],
     [
-      new Date().toLocaleString('zh-TW'),
-      Math.round((Date.now() - state.startedAt) / 1000),
-      state.mistakes,
-      GOAL,
+      record.exercise,
+      record.completedAt,
+      record.seconds,
+      record.mistakes,
+      record.maxStreak,
+      record.status,
     ],
   ];
   const blob = new Blob(
@@ -173,6 +209,12 @@ $('#download-button').addEventListener('click', downloadCsv);
 const scopeRule = document.querySelector('.rule-grid div:nth-child(3)');
 scopeRule.querySelector('b').textContent = QUESTION_BANK.length;
 scopeRule.querySelector('span').textContent = '講義公式範圍';
+
+const uploadStatus = document.createElement('p');
+uploadStatus.id = 'upload-status';
+uploadStatus.className = 'upload-status';
+uploadStatus.setAttribute('aria-live', 'polite');
+document.querySelector('.result-panel').insertAdjacentElement('afterend', uploadStatus);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
