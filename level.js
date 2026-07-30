@@ -1,49 +1,24 @@
 // ===== 整數加減過關（獨立頁）=====
-const VERSION = "v20";
+const VERSION = "v22";
+const PRACTICE_REMINDER_MS = 15 * 60 * 1000;
 
 // 答對稱讚語（隨機）
-const PRAISES = ["✨ 答對！", "🌟 Good！", "💯 太棒了！", "😊 正確！"];
+const PRAISES = ["答對了！", "很棒喔！", "計算正確", "Nice，繼續"];
 function praise() { return PRAISES[Math.floor(Math.random() * PRAISES.length)]; }
 
-// 吉祥物：紫色小貓「妍妍貓」，依心情切換表情
-function star(cx, cy, s) {
-  return `<path transform="translate(${cx} ${cy}) scale(${s})" fill="#FFD76A"
-    d="M0 -1 L0.25 -0.34 L0.95 -0.31 L0.4 0.13 L0.59 0.81 L0 0.42 L-0.59 0.81 L-0.4 0.13 L-0.95 -0.31 L-0.25 -0.34 Z"/>`;
-}
+// 吉祥物：3D 粉色小貓「妍妍貓」，依心情切換表情
 function mascotSvg(mood) {
-  const base = `
-    <path d="M28 42 L36 12 L60 34 Z" fill="#8B7BFF"/>
-    <path d="M92 42 L84 12 L60 34 Z" fill="#8B7BFF"/>
-    <path d="M35 34 L39 20 L50 32 Z" fill="#FF9EC4"/>
-    <path d="M85 34 L81 20 L70 32 Z" fill="#FF9EC4"/>
-    <ellipse cx="60" cy="68" rx="42" ry="38" fill="#9C8BFF"/>
-    <ellipse cx="60" cy="74" rx="30" ry="24" fill="#EFEAFF"/>
-    <circle cx="38" cy="76" r="6" fill="#FF9EC4" opacity=".75"/>
-    <circle cx="82" cy="76" r="6" fill="#FF9EC4" opacity=".75"/>
-    <path d="M60 70 l-3 4 h6 Z" fill="#FF9EC4"/>`;
-  const eyesOpen = `<circle cx="47" cy="64" r="6.5" fill="#3E2E6E"/><circle cx="73" cy="64" r="6.5" fill="#3E2E6E"/>
-    <circle cx="49" cy="61.5" r="2.2" fill="#fff"/><circle cx="75" cy="61.5" r="2.2" fill="#fff"/>`;
-  let face, extra = "";
-
-  if (mood === "happy" || mood === "combo" || mood === "win") {
-    // 瞇眼笑 + 開心大嘴
-    face = `<path d="M41 66 q6 -7 12 0" stroke="#3E2E6E" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-      <path d="M67 66 q6 -7 12 0" stroke="#3E2E6E" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-      <path d="M52 74 q8 9 16 0" stroke="#3E2E6E" stroke-width="2.8" fill="none" stroke-linecap="round"/>`;
-  } else if (mood === "confused") {
-    // 疑惑：一大一小眼、波浪嘴、藍色汗滴
-    face = `<circle cx="47" cy="64" r="6.5" fill="#3E2E6E"/><circle cx="49" cy="61.5" r="2.2" fill="#fff"/>
-      <circle cx="73" cy="65" r="3.6" fill="#3E2E6E"/>
-      <path d="M53 78 q3 -4 6 0 q3 4 6 0" stroke="#3E2E6E" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
-    extra = `<path d="M94 42 q-5 7 0 9 q5 -2 0 -9 Z" fill="#7EC8FF"/>`;
-  } else {
-    // idle
-    face = eyesOpen + `<path d="M54 76 q6 6 12 0" stroke="#3E2E6E" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
-  }
-  if (mood === "combo" || mood === "win") {
-    extra += star(40, 10, 6) + star(60, 4, 7) + star(80, 10, 6);
-  }
-  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${base}${face}${extra}</svg>`;
+  const file =
+    mood === "confused" ? "mascot-confused.png" :
+    mood === "combo" || mood === "win" ? "mascot-win.png" :
+    mood === "happy" ? "mascot-happy.png" :
+    "mascot-idle.png";
+  const alt =
+    mood === "confused" ? "妍妍貓疑惑表情" :
+    mood === "combo" || mood === "win" ? "妍妍貓戴星星慶祝" :
+    mood === "happy" ? "妍妍貓開心微笑" :
+    "妍妍貓";
+  return `<img src="icons/${file}" alt="${alt}" draggable="false">`;
 }
 
 // 顯示表情 + 跳動；delay 後回到 idle
@@ -98,6 +73,7 @@ let quiz = { input: "" };
 let lvl = { plan: [], step: 0, idx: 0, streak: 0, phase: "normal", q: null, wrongPool: [], review: null, customMix: [] };
 // 本次使用的統計紀錄
 let stats = null;
+let practiceReminderTimer = null;
 
 // ---- 工具 ----
 function show(id) {
@@ -111,6 +87,26 @@ function randInt(min, max) {
 // 第一個數字直接顯示、第二個數字若為負數加括號
 function fmt(n) { return n < 0 ? `(${n})` : `${n}`; }
 function showSetupError(msg) { $("#setup-error").textContent = msg; }
+function hidePracticeReminder() {
+  clearTimeout(practiceReminderTimer);
+  practiceReminderTimer = null;
+  $("#practice-reminder").hidden = true;
+}
+function showPracticeReminder() {
+  if (!stats || stats.finalized || stats.reminderShown || !$("#quiz").classList.contains("active")) return;
+  stats.reminderShown = true;
+  $("#reminder-mascot").innerHTML = mascotSvg("happy");
+  $("#practice-reminder").hidden = false;
+}
+function schedulePracticeReminder() {
+  clearTimeout(practiceReminderTimer);
+  const remaining = Math.max(0, PRACTICE_REMINDER_MS - (Date.now() - stats.startTime));
+  practiceReminderTimer = setTimeout(showPracticeReminder, remaining);
+}
+function finishPracticeForToday() {
+  hidePracticeReminder();
+  if (stats && !stats.finalized) finish(false);
+}
 
 // ---- 出題 ----
 function magFrom(min, max) {
@@ -134,6 +130,7 @@ function makeLevelQuestion() {
 // ---- 建立關卡勾選清單（1-8 雙排、第 9 關整排在最下）----
 function buildLevelSelect() {
   const box = $("#levels-select");
+  if (!box) return;
   box.innerHTML = "";
   for (let i = 0; i < TOTAL_LEVELS; i++) {
     const label = document.createElement("label");
@@ -145,43 +142,19 @@ function buildLevelSelect() {
 
 // ---- 開始 ----
 function start() {
-  const minA = parseInt($("#minA").value, 10);
-  const maxA = parseInt($("#maxA").value, 10);
-  const minB = parseInt($("#minB").value, 10);
-  const maxB = parseInt($("#maxB").value, 10);
-  if ([minA, maxA, minB, maxB].some((n) => Number.isNaN(n))) return showSetupError("範圍必須是數字");
-  if (minA > maxA || minB > maxB) return showSetupError("最小值不能大於最大值");
-
-  const checked = [...$$("#levels-select input:checked")]
-    .map((c) => parseInt(c.value, 10)).sort((a, b) => a - b);
-  if (checked.length === 0) return showSetupError("請至少勾選一關");
-
-  // 勾了第 9 關 → 只玩第 9 關，題目混合另外勾的 1~7 關（沒勾則全部 7 種）；否則照勾選依序玩
-  const level9 = TOTAL_LEVELS - 1;
-  let plan, customMix, planLabel;
-  if (checked.includes(level9)) {
-    customMix = checked.filter((i) => i < LEVELS.length);
-    plan = [level9];
-    const src = customMix.length ? customMix : LEVELS.map((_, i) => i);
-    planLabel = `第9關混合(${src.map((i) => i + 1).join("/")})`;
-  } else {
-    plan = checked;
-    customMix = [];
-    planLabel = plan.map((i) => i + 1).join(",");
-  }
-
-  settings = { minA, maxA, minB, maxB };
-  lvl = { plan, step: 0, idx: plan[0], streak: 0, phase: "normal", q: null, wrongPool: [], review: null, customMix };
+  const plan = [LEVELS.length]; // 固定從第 8 關「全混合」開始
+  settings = { minA: 10, maxA: 99, minB: 10, maxB: 99 };
+  lvl = { plan, step: 0, idx: plan[0], streak: 0, phase: "normal", q: null, wrongPool: [], review: null, customMix: [] };
   stats = {
     session: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-    startTime: Date.now(), planLabel,
-    answered: 0, wrong: 0, wrongList: [], reachedLevel: plan[0] + 1, finalized: false,
+    startTime: Date.now(), planLabel: "第8關（全混合，10–99）",
+    answered: 0, wrong: 0, wrongList: [], reachedLevel: plan[0] + 1, finalized: false, reminderShown: false,
   };
   startRecord();          // 登錄即先記一列「進行中」
 
-  showSetupError("");
   show("quiz");
   renderLevelQuestion();
+  schedulePracticeReminder();
 }
 
 // ---- 一般答題 ----
@@ -190,12 +163,6 @@ function renderLevelQuestion() {
   lvl.q = makeLevelQuestion();
   quiz.input = "";
   $("#review-panel").hidden = true;
-  let bannerName = levelName(lvl.idx);
-  if (lvl.idx === LEVELS.length + 1) {
-    bannerName = `自選混合（${mixPool().map((i) => LEVELS[i].name.replace(/ /g, "")).join("・")}）`;
-  }
-  $("#level-banner").innerHTML =
-    `第 ${lvl.idx + 1} 關　${bannerName}<span class="sub">進度 ${lvl.step + 1} / ${lvl.plan.length} 關</span>`;
   $("#question").textContent = lvl.q.text;
   updateAnswerBox();
   $("#feedback").textContent = "";
@@ -209,7 +176,7 @@ function updateLevelProgress() {
     $("#progress-text").textContent = `複習 ${lvl.review.pos} / ${lvl.review.queue.length}`;
   } else {
     $("#progress-bar").style.width = (lvl.streak / GOAL * 100) + "%";
-    $("#progress-text").textContent = `連續 ${lvl.streak} / ${GOAL}　錯 ${lvl.wrongPool.length}/${REVIEW_TRIGGER}`;
+    $("#progress-text").textContent = `連續 ${lvl.streak} / ${GOAL}`;
   }
 }
 
@@ -217,7 +184,7 @@ function updateLevelProgress() {
 function updateAnswerBox() {
   const box = $("#answer");
   if (quiz.input === "" || quiz.input === "-") {
-    box.innerHTML = quiz.input === "-" ? "-<span class='placeholder'>?</span>" : "<span class='placeholder'>輸入答案 ✨</span>";
+    box.innerHTML = quiz.input === "-" ? "-<span class='placeholder'>?</span>" : "<span class='placeholder'>輸入答案</span>";
   } else {
     box.textContent = quiz.input;
   }
@@ -257,7 +224,7 @@ function onSubmit() {
   if (correct) {
     box.classList.add("ok"); fb.className = "feedback ok";
     if (lvl.phase === "retry") {
-      fb.textContent = "✨ 正確！";
+      fb.textContent = "答對了，繼續挑戰";
       mascotReact("happy", false);
       if (lvl.wrongPool.length >= REVIEW_TRIGGER) setTimeout(startReview, 600);
       else setTimeout(renderLevelQuestion, 500);
@@ -265,11 +232,11 @@ function onSubmit() {
       lvl.streak++;
       updateLevelProgress();
       if (lvl.streak >= GOAL) {
-        fb.textContent = "⭐ Perfect！過關！ 🎉";
+        fb.textContent = "Perfect！挑戰完成";
         mascotReact("combo", true);
         setTimeout(clearLevel, 900);
       } else if (lvl.streak % 5 === 0) {
-        fb.textContent = `🔥 ${lvl.streak} 連擊！`;
+        fb.textContent = `COMBO × ${lvl.streak}`;
         mascotReact("combo", true);
         setTimeout(renderLevelQuestion, 550);
       } else {
@@ -285,7 +252,7 @@ function onSubmit() {
     lvl.phase = "retry";
     updateLevelProgress();
     mascotReact("confused");
-    fb.textContent = `答錯，正確答案是 ${q.answer}，請重新輸入`;
+    fb.textContent = `正確答案是 ${q.answer}，請重新輸入`;
     clearInputSoon(box);
   }
 }
@@ -316,7 +283,7 @@ function renderReviewList() {
     return `<div class="rv-item ${cls}">${q.text.replace(" =", "")}${mark}</div>`;
   }).join("");
   $("#review-panel").innerHTML =
-    `<div class="review-title">錯題複習 — 這 ${lvl.review.queue.length} 題全部答對才繼續</div>` +
+    `<div class="review-title">錯題練習 <span>完成 ${lvl.review.queue.length} 題即可繼續</span></div>` +
     `<div class="review-items">${items}</div>`;
 }
 function submitReview() {
@@ -331,7 +298,7 @@ function submitReview() {
     box.classList.add("ok"); fb.className = "feedback ok";
     lvl.review.pos++;
     if (lvl.review.pos >= lvl.review.queue.length) {
-      fb.textContent = "🎀 複習完成，繼續闖關！";
+      fb.textContent = "複習完成，繼續挑戰";
       mascotReact("combo", true);
       setTimeout(renderLevelQuestion, 800);
     } else {
@@ -342,7 +309,7 @@ function submitReview() {
   } else {
     box.classList.add("bad"); fb.className = "feedback bad";
     mascotReact("confused");
-    fb.textContent = `答錯，正確答案是 ${q.answer}，請重新輸入`;
+    fb.textContent = `正確答案是 ${q.answer}，請重新輸入`;
     clearInputSoon(box);
   }
 }
@@ -362,11 +329,13 @@ function clearLevel() {
 
 // ---- 結束並回傳紀錄 ----
 function finish(completed) {
+  hidePracticeReminder();
   const elapsedSec = Math.round((Date.now() - stats.startTime) / 1000);
   show("result");
-  $("#result-title").textContent = completed ? "全部過關！ 🎉" : "本次結束";
-  $("#score").textContent = completed ? "全破 🏆" : `到第 ${stats.reachedLevel} 關`;
-  $("#mascot-win").innerHTML = completed ? mascotSvg("win") : "";
+  $(".result-kicker").textContent = completed ? "CHALLENGE COMPLETE" : "CHALLENGE REPORT";
+  $("#result-title").textContent = completed ? "挑戰完成" : "本次練習結束";
+  $("#score").textContent = completed ? "PERFECT" : `完成 ${stats.answered} 題`;
+  $("#mascot-win").innerHTML = completed ? mascotSvg("win") : mascotSvg("idle");
   if (completed) confetti();
   $("#score-detail").innerHTML =
     `作答 ${stats.answered} 題　答錯 ${stats.wrong} 題<br>用時 ${formatTime(elapsedSec)}`;
@@ -375,7 +344,7 @@ function finish(completed) {
   const list = $("#wrong-list");
   list.innerHTML = "";
   if (stats.wrongList.length === 0) {
-    list.innerHTML = "<div class='wrong-item' style='justify-content:center;color:var(--ok)'>沒有錯題，太棒了！ 🎉</div>";
+    list.innerHTML = "<div class='wrong-item clear'>本次沒有錯題</div>";
   } else {
     stats.wrongList.forEach((w) => {
       const div = document.createElement("div");
@@ -395,7 +364,7 @@ function formatTime(sec) {
 
 // 全破時灑彩帶
 function confetti() {
-  const colors = ["#FFD76A", "#9C8BFF", "#7E6BFF", "#FF9EC4", "#7BE0B0"];
+  const colors = ["#FFD36E", "#F48AAF", "#C9A8FF", "#FFB6CE", "#7FD8C7"];
   for (let i = 0; i < 44; i++) {
     const p = document.createElement("div");
     p.className = "confetti-piece";
@@ -453,6 +422,7 @@ function finalize(completed, beacon) {
 
 // ---- 中途離開 ----
 function quit() {
+  hidePracticeReminder();
   if (stats && !stats.finalized) {
     if (stats.answered > 0) { finish(false); return; }   // 有作答：顯示結果並記錄未通關
     finalize(false);                                      // 完全沒作答：直接記未通關
@@ -474,12 +444,13 @@ $("#quit-btn").addEventListener("click", quit);
 $("#submit-btn").addEventListener("click", onSubmit);
 $("#again-btn").addEventListener("click", start);
 $("#home-btn").addEventListener("click", () => show("setup"));
-$("#lvl-all").addEventListener("click", () => $$("#levels-select input").forEach((c) => (c.checked = true)));
-$("#lvl-none").addEventListener("click", () => $$("#levels-select input").forEach((c) => (c.checked = false)));
+$("#rest-today-btn").addEventListener("click", finishPracticeForToday);
+$("#keep-practicing-btn").addEventListener("click", hidePracticeReminder);
 $$(".key").forEach((k) => k.addEventListener("click", () => pressKey(k.dataset.key)));
 
 document.addEventListener("keydown", (e) => {
   if (!$("#quiz").classList.contains("active")) return;
+  if (!$("#practice-reminder").hidden) return;
   if (e.key >= "0" && e.key <= "9") pressKey(e.key);
   else if (e.key === "-") pressKey("sign");
   else if (e.key === "Backspace") pressKey("back");
@@ -507,7 +478,7 @@ document.addEventListener("touchend", (e) => {
 // 初始化
 buildLevelSelect();
 $("#mascot").innerHTML = mascotSvg("idle");
-$("#app-version").textContent = `整數加減過關　${VERSION}`;
+$("#app-version").textContent = `綺妍的加減過關　${VERSION}`;
 
 // Service Worker
 if ("serviceWorker" in navigator) {

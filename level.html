@@ -3,12 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#8B7BFF" />
+  <meta name="theme-color" content="#F05B93" />
   <title>綺妍-整數加減過關</title>
+  <meta name="description" content="PINK CAT × MATH｜綺妍的正負整數混合挑戰，答對 30 題拿下 Perfect！" />
+
+  <link rel="canonical" href="https://waaamath.github.io/math-drill-pwa/level.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_TW" />
+  <meta property="og:site_name" content="綺妍的加減過關" />
+  <meta property="og:title" content="綺妍的加減過關｜整數混合挑戰" />
+  <meta property="og:description" content="正負整數混合挑戰，答對 30 題，拿下 Perfect！" />
+  <meta property="og:url" content="https://waaamath.github.io/math-drill-pwa/level.html" />
+  <meta property="og:image" content="https://waaamath.github.io/math-drill-pwa/icons/social-preview-level-v22.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="綺妍的加減過關粉色貓咪數學挑戰縮圖" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="綺妍的加減過關｜整數混合挑戰" />
+  <meta name="twitter:description" content="正負整數混合挑戰，答對 30 題，拿下 Perfect！" />
+  <meta name="twitter:image" content="https://waaamath.github.io/math-drill-pwa/icons/social-preview-level-v22.png" />
 
   <link rel="manifest" href="manifest-level.webmanifest" />
-  <link rel="icon" type="image/svg+xml" href="icons/icon-level.svg" />
-  <link rel="apple-touch-icon" href="icons/icon-level-192.png" />
+  <link rel="icon" type="image/png" href="icons/icon-level-192.png?v=22" />
+  <link rel="apple-touch-icon" href="icons/icon-level-192.png?v=22" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="綺妍過關" />
@@ -25,36 +42,19 @@
 
     <!-- ===== 設定畫面 ===== -->
     <section id="setup" class="screen active">
-      <h1>🎮 綺妍的加減過關</h1>
-
-      <div class="card">
-        <h2>⭐ 選擇要練的關卡</h2>
-        <div id="levels-select" class="levels-select"></div>
-        <p class="mix-note">勾第 9 關＝只玩第 9 關，題目混合你另外勾的 1～7 關</p>
-        <div class="levels-actions">
-          <button type="button" class="mini-btn" id="lvl-all">全選</button>
-          <button type="button" class="mini-btn" id="lvl-none">全不選</button>
+      <div class="challenge-hero">
+        <div class="hero-tag">PINK CAT × MATH</div>
+        <div class="hero-orbit orbit-one"></div>
+        <div class="hero-orbit orbit-two"></div>
+        <div class="hero-icon" aria-label="妍妍貓">
+          <img src="icons/mascot-idle.png" alt="妍妍貓">
         </div>
+        <h1>綺妍的加減過關</h1>
+        <p class="hero-lead">正負整數混合挑戰</p>
+        <p class="hero-note">答對 30 題，拿下 Perfect！</p>
+        <button id="start-btn" class="primary hero-start">開始挑戰 <span>→</span></button>
+        <p class="hero-credit">課程規劃｜思創補習班・俞宏老師</p>
       </div>
-
-      <div class="card">
-        <h2>🔢 第一個數字</h2>
-        <div class="range-row">
-          <label>最小 <input type="number" id="minA" value="1"></label>
-          <label>最大 <input type="number" id="maxA" value="20"></label>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>🔢 第二個數字</h2>
-        <div class="range-row">
-          <label>最小 <input type="number" id="minB" value="1"></label>
-          <label>最大 <input type="number" id="maxB" value="20"></label>
-        </div>
-      </div>
-
-      <p id="setup-error" class="error"></p>
-      <button id="start-btn" class="primary big">🚀 開始挑戰</button>
     </section>
 
     <!-- ===== 過關畫面 ===== -->
@@ -65,7 +65,6 @@
         <span id="progress-text">連續 0 / 30</span>
       </header>
 
-      <div id="level-banner" class="level-banner"></div>
       <div id="review-panel" class="review-panel" hidden></div>
 
       <div class="question-area">
@@ -96,14 +95,28 @@
     <!-- ===== 結果畫面 ===== -->
     <section id="result" class="screen">
       <div id="mascot-win" class="mascot-win"></div>
+      <div class="result-kicker">MISSION REPORT</div>
       <h1 id="result-title">練習結束</h1>
       <div id="score" class="score"></div>
       <div id="score-detail" class="score-detail"></div>
       <div id="record-status" class="record-status"></div>
+      <p class="result-credit">課程規劃｜思創補習班・俞宏老師</p>
       <div id="wrong-list" class="wrong-list"></div>
-      <button id="again-btn" class="primary big">再一次</button>
-      <button id="home-btn" class="ghost big">回設定</button>
+      <button id="again-btn" class="primary big">再次挑戰</button>
+      <button id="home-btn" class="ghost big">返回首頁</button>
     </section>
+
+    <div id="practice-reminder" class="practice-reminder" role="dialog" aria-modal="true" aria-labelledby="practice-reminder-title" hidden>
+      <div class="practice-reminder-card">
+        <div id="reminder-mascot" class="reminder-mascot"></div>
+        <div class="practice-reminder-kicker">15 MINUTES COMPLETE</div>
+        <h2 id="practice-reminder-title">今天練習得很棒！</h2>
+        <p>你已經認真練習 15 分鐘，很棒！</p>
+        <p class="practice-reminder-note">今天可以休息了<br>明天我們繼續。</p>
+        <button id="rest-today-btn" class="primary reminder-primary">結束今天的練習</button>
+        <button id="keep-practicing-btn" class="ghost reminder-secondary">我想再練一下</button>
+      </div>
+    </div>
 
     <footer id="app-version" class="app-version"></footer>
 

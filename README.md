@@ -42,7 +42,9 @@ git push -u origin main
 `level.html` 是**只有過關模式**的獨立頁面，可單獨安裝、單獨發連結：
 `https://waaamath.github.io/math-drill-pwa/level.html`
 
-功能：8 關正負加減闖關（第 8 關混合）、自選關卡、錯題複習，結束後可把成績**回傳 Google 試算表**。
+目前為綺妍專用的粉色貓咪版：直接進入第 8 關正負整數混合挑戰，兩個數字皆為 10～99，連續答對 30 題過關；保留錯題重練、實體／螢幕鍵盤與成績**回傳 Google 試算表**。
+
+開始挑戰滿 15 分鐘會顯示休息提醒，可選擇結束並正常回傳本次成績，或繼續練習。
 
 ### 設定成績回傳（Apps Script → Google 試算表）
 1. 開 https://script.google.com 新增專案，把 `gas/Code.gs` 內容整段貼進去
